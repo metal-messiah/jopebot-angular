@@ -1,0 +1,7 @@
+<a [routerLink]="user.id" *ngFor="let user of users">
+  {{ user.username }}
+</a>
+<mat-spinner
+  color="accent"
+  *ngIf="!authService.currentUser || !users.length"
+></mat-spinner>

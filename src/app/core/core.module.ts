@@ -8,6 +8,10 @@ import { AuthGuard } from "./services/auth.guard";
 import { RestService } from "./services/rest.service";
 import { CanDeactivateGuard } from "./services/can-deactivate.guard";
 import { UserService } from "./services/user.service";
+import { RequestService } from "./services/request.service";
+import { StreamerSettingsService } from "./services/streamer-settings.service";
+import { StreamerSongsService } from "./services/streamer-songs.service";
+import { StreamerUserPrivilegesService } from "./services/streamer-user-privileges.service";
 
 @NgModule({
   imports: [CommonModule],
@@ -20,6 +24,10 @@ import { UserService } from "./services/user.service";
     AuthGuard,
     RestService,
     UserService,
+    RequestService,
+    StreamerSettingsService,
+    StreamerSongsService,
+    StreamerUserPrivilegesService,
     CanDeactivateGuard
   ]
 })

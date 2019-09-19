@@ -10,7 +10,7 @@ import { UserService } from "app/core/services/user.service";
   styleUrls: ["./all-users.component.css"]
 })
 export class AllUsersComponent implements OnInit {
-  users: User[];
+  users: User[] = [];
   errorMsg: string;
 
   constructor(

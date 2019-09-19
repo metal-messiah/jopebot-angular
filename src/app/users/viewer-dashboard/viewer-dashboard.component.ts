@@ -3,6 +3,11 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "app/core/services/auth.service";
 import { User } from "../../models/user";
 import { UserService } from "app/core/services/user.service";
+import { StreamerSongsService } from "app/core/services/streamer-songs.service";
+import { StreamerUserPrivilegesService } from "app/core/services/streamer-user-privileges.service";
+import { StreamerSettingsService } from "app/core/services/streamer-settings.service";
+import { RequestService } from "app/core/services/request.service";
+import { Request } from "../../models/request";
 
 @Component({
   selector: "app-viewer-dashboard",
@@ -13,18 +18,20 @@ export class ViewerDashboardComponent implements OnInit {
   userFromId: User;
   errorMsg: string;
 
+  requestQueue: Request[] = [];
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private requestService: RequestService,
+    private streamerSettingsService: StreamerSettingsService,
+    private streamerSongsService: StreamerSongsService,
+    private streamerUserPrivilegesService: StreamerUserPrivilegesService
   ) {}
 
   async ngOnInit() {
-    if (!this.route.snapshot.paramMap.get("userid")) {
-      console.log("NO USER ID!");
-    }
-
     // Subscribed
     this.route.paramMap.subscribe(async params => {
       console.log("subscription!");
@@ -34,6 +41,12 @@ export class ViewerDashboardComponent implements OnInit {
         .toPromise();
       if (!this.userFromId.hasOwnProperty("id")) {
         this.errorMsg = `${userIdParam} does not reference a valid user...`;
+      } else {
+        this.requestService
+          .getAll({ user_id: userIdParam, played: false })
+          .subscribe((requests: Request[]) => {
+            this.requestQueue = requests;
+          });
       }
     });
   }

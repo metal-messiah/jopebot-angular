@@ -1,5 +1,4 @@
 import { Entity } from "./entity";
-import { UserState } from "./user-state";
 
 export class Request implements Entity {
   id: number;
@@ -13,6 +12,8 @@ export class Request implements Entity {
 
   attachment?: File;
   link?: URL;
+
+  created_by: number;
 
   constructor(obj: Request) {
     Object.assign(this, obj);

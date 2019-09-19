@@ -1,0 +1,29 @@
+<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p>
+<div *ngIf="authService.currentUser && userFromId">
+  <div>
+    <h3 style="text-align: center">request list stuff</h3>
+    <div class="item" *ngFor="let request of requestQueue">
+      <div>User: {{ request.user_id }} (will change to user object)</div>
+      <div>message: {{ request.message }}</div>
+      <div>link: {{ request.link }}</div>
+      <div>attachment: {{ request.attachment }}</div>
+      <div>
+        created by: {{ request.created_by }} (will change to user object)
+      </div>
+    </div>
+  </div>
+  <div>
+    played requests stuff
+  </div>
+  <div>
+    make a new request (songs)
+  </div>
+  <div>
+    polls?
+  </div>
+</div>
+<!-- <button mat-button color="warn"></button> -->
+<mat-spinner
+  color="accent"
+  *ngIf="!authService.currentUser || !userFromId"
+></mat-spinner>

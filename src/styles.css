@@ -1,1 +1,123 @@
 /* You can add global styles to this file, and also import other style files */
+/* @import "@angular/material/prebuilt-themes/purple-green.css"; */
+
+/* You can add global styles to this file, and also import other style files */
+html,
+body,
+.viewport {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  display: flex;
+}
+
+a,
+a:focus,
+a:visited {
+  color: #aaa;
+  text-decoration: none;
+}
+
+a:hover {
+  color: orange;
+}
+
+#app-root {
+  width: 100%;
+  height: 100%;
+}
+
+.flex-space-between {
+  justify-content: space-between;
+}
+
+.flex-space-around {
+  justify-content: space-around;
+}
+
+.flex-justify-end {
+  justify-content: flex-end;
+}
+
+.flex-justify-center {
+  justify-content: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 400px;
+  max-width: 100%;
+}
+
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box .row.header {
+  min-height: 56px;
+  flex: 0 0.5 auto;
+}
+
+.box .row.content {
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.box .row.footer {
+  flex: 0 1 50px;
+}
+
+.list-wrapper {
+  margin: 15px auto;
+  max-width: 500px;
+}
+
+.mat-input-element:disabled {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+.mat-toolbar {
+  background: unset;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-align-center {
+  align-items: center;
+}
+
+.component-title {
+  padding: 0 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: orange;
+  outline: 1px solid slategrey;
+}

@@ -11,15 +11,30 @@
         created by: {{ request.created_by }} (will change to user object)
       </div>
     </div>
+    <div class="item" *ngIf="!requestQueue.length && userFromId">
+      No Upcoming Requests for {{ userFromId.username }}
+    </div>
   </div>
   <div>
-    played requests stuff
+    <h3 style="text-align: center">played requests list</h3>
+    <div class="item" *ngFor="let request of playedRequests">
+      <div>User: {{ request.user_id }} (will change to user object)</div>
+      <div>message: {{ request.message }}</div>
+      <div>link: {{ request.link }}</div>
+      <div>attachment: {{ request.attachment }}</div>
+      <div>
+        created by: {{ request.created_by }} (will change to user object)
+      </div>
+    </div>
+    <div class="item" *ngIf="!playedRequests.length && userFromId">
+      No Played Requests
+    </div>
   </div>
   <div>
-    make a new request (songs)
+    <h3 style="text-align: center">Make A New Request (Songs DB)</h3>
   </div>
   <div>
-    polls?
+    <h3 style="text-align: center">Interactive Polls?</h3>
   </div>
 </div>
 <!-- <button mat-button color="warn"></button> -->

@@ -19,6 +19,7 @@ export class ViewerDashboardComponent implements OnInit {
   errorMsg: string;
 
   requestQueue: Request[] = [];
+  playedRequests: Request[] = [];
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -42,11 +43,14 @@ export class ViewerDashboardComponent implements OnInit {
       if (!this.userFromId.hasOwnProperty("id")) {
         this.errorMsg = `${userIdParam} does not reference a valid user...`;
       } else {
-        this.requestService
+        this.requestQueue = await this.requestService
           .getAll({ user_id: userIdParam, played: false })
-          .subscribe((requests: Request[]) => {
-            this.requestQueue = requests;
-          });
+          .toPromise();
+
+        this.playedRequests = await this.requestService
+          .getAll({ user_id: userIdParam, played: true })
+          .toPromise();
+        console.log(this.playedRequests);
       }
     });
   }

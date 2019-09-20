@@ -36,19 +36,21 @@ export class ViewerDashboardComponent implements OnInit {
     // Subscribed
     this.route.paramMap.subscribe(async params => {
       console.log("subscription!");
-      const userIdParam = params.get("userid");
+      const stremerIdParam = params.get("userid");
       this.userFromId = await this.userService
-        .getOneById(userIdParam)
+        .getOneById(stremerIdParam)
         .toPromise();
       if (!this.userFromId.hasOwnProperty("id")) {
-        this.errorMsg = `${userIdParam} does not reference a valid user...`;
+        this.errorMsg = `${stremerIdParam} does not reference a valid user...`;
       } else {
         this.requestQueue = await this.requestService
-          .getAll({ user_id: userIdParam, played: false })
+          .getAll({ streamer_id: stremerIdParam, played: false })
           .toPromise();
 
+        console.log(this.requestQueue);
+
         this.playedRequests = await this.requestService
-          .getAll({ user_id: userIdParam, played: true })
+          .getAll({ streamer_id: stremerIdParam, played: true })
           .toPromise();
         console.log(this.playedRequests);
       }

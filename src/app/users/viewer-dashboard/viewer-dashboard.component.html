@@ -3,13 +3,12 @@
   <div>
     <h3 style="text-align: center">request list stuff</h3>
     <div class="item" *ngFor="let request of requestQueue">
-      <div>User: {{ request.user_id }} (will change to user object)</div>
+      <div>Requested By: {{ request.user.username }}</div>
       <div>message: {{ request.message }}</div>
       <div>link: {{ request.link }}</div>
       <div>attachment: {{ request.attachment }}</div>
-      <div>
-        created by: {{ request.created_by }} (will change to user object)
-      </div>
+      <div>created by: {{ request.createdBy.username }}</div>
+      <div>created at: {{ request.createdAt | date: "short":"PST" }}</div>
     </div>
     <div class="item" *ngIf="!requestQueue.length && userFromId">
       No Upcoming Requests for {{ userFromId.username }}
@@ -18,13 +17,11 @@
   <div>
     <h3 style="text-align: center">played requests list</h3>
     <div class="item" *ngFor="let request of playedRequests">
-      <div>User: {{ request.user_id }} (will change to user object)</div>
+      <div>Requested By: {{ request.user.username }}</div>
       <div>message: {{ request.message }}</div>
       <div>link: {{ request.link }}</div>
       <div>attachment: {{ request.attachment }}</div>
-      <div>
-        created by: {{ request.created_by }} (will change to user object)
-      </div>
+      <div>played at: {{ request.updatedAt | date: "short":"MST" }}</div>
     </div>
     <div class="item" *ngIf="!playedRequests.length && userFromId">
       No Played Requests

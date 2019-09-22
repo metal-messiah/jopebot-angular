@@ -1,7 +1,13 @@
-<a [routerLink]="user.id" *ngFor="let user of users">
-  {{ user.username }}
-</a>
-<mat-spinner
-  color="accent"
-  *ngIf="!authService.currentUser || !users.length"
-></mat-spinner>
+<div class="item-container">
+  <div class="item-card" [routerLink]="user.id" *ngFor="let user of users">
+    <div class="item-card-title">{{ user.display_name }}</div>
+    <div
+      class="item-card-logo"
+      [ngStyle]="{ backgroundImage: 'url(' + user.logo + ')' }"
+    ></div>
+  </div>
+  <mat-spinner
+    color="accent"
+    *ngIf="!authService.currentUser || !users.length"
+  ></mat-spinner>
+</div>

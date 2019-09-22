@@ -1,4 +1,60 @@
 <mat-toolbar class="header-bar" color="primary">
-  <div>JopeBot Header Bar</div>
+  <mat-toolbar-row class="primary">
+    <div>
+      <img
+        #logo
+        [@flipInY]="flipInY"
+        (click)="goHome()"
+        class="logo"
+        src="assets/images/logo.PNG"
+      />
+      <button
+        (click)="getAction()"
+        mat-button
+        color="accent"
+        [@fadeIn]="fadeIn"
+        style="padding: 0;"
+        class="auth-button"
+      >
+        <div class="auth-text">
+          <fa-icon
+            [icon]="getAuthIcon()"
+            [pulse]="getAuthIconPulse()"
+          ></fa-icon>
+          {{ getAuthText() }}
+        </div>
+        <div *ngIf="checkedLogin" class="auth-action">
+          {{ getActionText() }}
+        </div>
+      </button>
+    </div></mat-toolbar-row
+  >
+  <mat-toolbar-row [@slideInUp]="slideInUp" class="secondary">
+    <button mat-button routerLink="/my-bot" routerLinkActive="mat-warn">
+      My Bot
+    </button>
+    <button mat-button routerLink="/users" routerLinkActive="mat-warn">
+      Users
+    </button>
+    <button mat-button routerLink="/blog" routerLinkActive="mat-warn">
+      Blog
+    </button>
+    <!-- FORCE THE MENU TO THE RIGHT ALWAYS! -->
+    <div class="flex-spacer"></div>
+    <!-- FORCE THE MENU TO THE RIGHT ALWAYS! -->
+    <button mat-button [matMenuTriggerFor]="extras">
+      <fa-icon [icon]="['fas', 'caret-square-down']"></fa-icon>
+    </button>
+    <mat-menu #extras="matMenu">
+      <button mat-menu-item routerLink="/about" routerLinkActive="mat-warn">
+        About
+      </button>
+      <button mat-menu-item routerLink="/contact" routerLinkActive="mat-warn">
+        Contact Us
+      </button>
+    </mat-menu>
+  </mat-toolbar-row>
 </mat-toolbar>
-<router-outlet></router-outlet>
+<div class="main-content">
+  <router-outlet></router-outlet>
+</div>

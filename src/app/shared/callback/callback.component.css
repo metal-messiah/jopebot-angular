@@ -1,12 +1,28 @@
-:host {
-  position: absolute;
+.mat-toolbar {
+  background: #4a148c;
+  /* background-image: linear-gradient(#4a148c, #303030); */
+  color: #eee;
   display: flex;
-  justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #fff;
+  align-items: center;
+
+  background-image: url("assets/images/background-texture.png");
+
+  box-shadow: black 0px 0px 5px;
+}
+
+.mat-toolbar > div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mat-toolbar * {
+  font-family: "Audiowide", cursive;
+}
+
+.logo {
+  max-height: 40px;
+  margin-bottom: 10px;
 }

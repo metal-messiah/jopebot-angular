@@ -23,6 +23,7 @@ export class AllUsersComponent implements OnInit {
   async ngOnInit() {
     this.userService.getAll().subscribe((users: User[]) => {
       this.users = users;
+      console.log(users);
     });
   }
 }

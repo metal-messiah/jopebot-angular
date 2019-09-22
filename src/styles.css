@@ -121,3 +121,7 @@ fieldset {
   background-color: orange;
   outline: 1px solid slategrey;
 }
+
+.breadcrumb {
+  background: #303030 !important;
+}

@@ -77,4 +77,12 @@ export abstract class CrudService<T extends Entity> {
       withCredentials: true
     });
   }
+
+  exists(id: number): Observable<boolean> {
+    const url = this.rest.getHost() + this.endpoint + `/${id}/exists`;
+    return this.http.get<boolean>(url, {
+      headers: this.rest.getHeaders(),
+      withCredentials: true
+    });
+  }
 }

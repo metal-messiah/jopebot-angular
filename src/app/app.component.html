@@ -30,7 +30,7 @@
     </div></mat-toolbar-row
   >
   <mat-toolbar-row [@slideInUp]="slideInUp" class="secondary">
-    <button mat-button routerLink="/my-bot" routerLinkActive="mat-warn">
+    <button mat-button routerLink="/bot" routerLinkActive="mat-warn">
       My Bot
     </button>
     <button mat-button routerLink="/users" routerLinkActive="mat-warn">
@@ -40,10 +40,8 @@
       Blog
     </button>
     <!-- FORCE THE MENU TO THE RIGHT ALWAYS! -->
-    <div class="flex-spacer"></div>
-    <!-- FORCE THE MENU TO THE RIGHT ALWAYS! -->
     <button mat-button [matMenuTriggerFor]="extras">
-      <fa-icon [icon]="['fas', 'caret-square-down']"></fa-icon>
+      More
     </button>
     <mat-menu #extras="matMenu">
       <button mat-menu-item routerLink="/about" routerLinkActive="mat-warn">

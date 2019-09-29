@@ -1,22 +1,178 @@
-<div class="item-container">
-  <p *ngIf="errorMsg">
-    {{ authService.currentUser.username }} -- {{ errorMsg }}
-  </p>
-  <div class="request-queue" *ngIf="authService.currentUser && userFromId">
-    <h3 style="text-align: center">Request Queue</h3>
+<h1 *ngIf="userFromId">{{ userFromId.displayName }}</h1>
+<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p>
+<div class="modules-container">
+  <div
+    id="request-queue"
+    class="module"
+    *ngIf="authService.currentUser && userFromId"
+  >
+    <h3>Request Queue</h3>
+    <mat-progress-bar
+      *ngIf="fetching.requestQueue"
+      mode="indeterminate"
+    ></mat-progress-bar>
     <div class="item-container">
-      <div class="item-card" *ngFor="let request of requestQueue">
-        <div class="item-card-title">{{ request.createdBy.display_name }}</div>
-        <div
-          class="item-card-logo"
-          [ngStyle]="{ backgroundImage: 'url(' + request.createdBy.logo + ')' }"
-        ></div>
+      <div
+        class="item-card"
+        *ngFor="let request of requestQueue; let i = index"
+        [matBadge]="i + 1"
+        matBadgePosition="before"
+        [@zoomIn]="zoomIn"
+      >
+        <div class="item-card-row">
+          <div class="item-card-title">{{ request.message }}</div>
+          <div
+            class="item-card-logo"
+            [ngStyle]="{
+              backgroundImage: 'url(' + request.createdBy.logo + ')'
+            }"
+          ></div>
+        </div>
+        <div class="item-card-row">
+          <div class="item-card-date">
+            {{ request.createdAt | date: "medium" }}
+          </div>
+          <button
+            mat-icon-button
+            color="warn"
+            [disabled]="!request.attachment"
+            (click)="downloadAttachment(request.attachment)"
+            matTooltip="Go to Attachment"
+            matTooltipPosition="left"
+          >
+            <i class="fas fa-paperclip"></i>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            [disabled]="!request.link"
+            (click)="openLink(request.link)"
+            matTooltip="Open Link"
+            matTooltipPosition="left"
+          >
+            <i class="fas fa-link"></i>
+          </button>
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="itemCardMenu"
+            [disabled]="shouldDisableMenu(request)"
+            matTooltip="More Actions"
+            matTooltipPosition="right"
+          >
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
+  <div
+    id="played-requests"
+    class="module"
+    *ngIf="authService.currentUser && userFromId"
+  >
+    <h3>Played Requests</h3>
+    <mat-progress-bar
+      *ngIf="fetching.playedRequests"
+      mode="indeterminate"
+    ></mat-progress-bar>
+    <div class="item-container">
+      <div
+        class="item-card"
+        *ngFor="let request of playedRequests; let i = index"
+        [matBadge]="playedRequests.length - i"
+        matBadgePosition="before"
+        [@zoomIn]="zoomIn"
+      >
+        <div class="item-card-row">
+          <div class="item-card-title">{{ request.message }}</div>
+          <div
+            class="item-card-logo"
+            [ngStyle]="{
+              backgroundImage: 'url(' + request.createdBy.logo + ')'
+            }"
+          ></div>
+        </div>
+        <div class="item-card-row">
+          <div class="item-card-date">
+            {{ request.played | date: "medium" }}
+          </div>
+          <button
+            mat-icon-button
+            color="warn"
+            [disabled]="!request.attachment"
+            (click)="downloadAttachment(request.attachment)"
+            matTooltip="Go to Attachment"
+            matTooltipPosition="left"
+          >
+            <i class="fas fa-paperclip"></i>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            [disabled]="!request.link"
+            (click)="openLink(request.link)"
+            matTooltip="Open Link"
+            matTooltipPosition="left"
+          >
+            <i class="fas fa-link"></i>
+          </button>
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="itemCardMenu"
+            [disabled]="shouldDisableMenu(request)"
+            matTooltip="More Actions"
+            matTooltipPosition="right"
+          >
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button (click)="newRequest()" id="new-request-button" mat-fab color="warn">
+    <i class="fas fa-plus-circle"></i>
+  </button>
+
+  <mat-menu #itemCardMenu="matMenu" yPosition="below" xPosition="after">
+    <button mat-menu-item>
+      Edit
+    </button>
+    <button mat-menu-item>
+      Delete
+    </button>
+  </mat-menu>
+
   <mat-spinner
     color="accent"
-    *ngIf="!authService.currentUser || !userFromId"
+    *ngIf="!authService.currentUser || (!userFromId && !errorMsg)"
   ></mat-spinner>
 </div>
+
+<mat-toolbar class="bottom-bar">
+  <button
+    mat-flat-button
+    (click)="scrollTo('request-queue')"
+    matTooltip="Request Queue"
+    matTooltipPosition="above"
+  >
+    <i class="fas fa-list-ol"></i>
+  </button>
+  <button
+    mat-flat-button
+    (click)="scrollTo('played-requests')"
+    matTooltip="Played Requests"
+    matTooltipPosition="above"
+  >
+    <i class="fas fa-clipboard-check"></i>
+  </button>
+  <button
+    mat-flat-button
+    (click)="scrollTo('songs')"
+    matTooltip="Songs List"
+    matTooltipPosition="above"
+  >
+    <i class="fas fa-music"></i>
+  </button>
+</mat-toolbar>

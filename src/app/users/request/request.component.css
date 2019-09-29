@@ -1,0 +1,56 @@
+.fields-form {
+  width: 100%;
+}
+
+.fields {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+}
+
+.fields > div,
+.songs-values > div {
+  overflow: hidden;
+  padding: 5px;
+  text-overflow: ellipsis;
+  width: 100%;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+}
+
+.fields {
+  font-weight: bold;
+  color: orange;
+}
+
+.songs-values {
+  font-size: small;
+}
+
+.songs-values:hover {
+  background: orange;
+  cursor: pointer;
+  color: black !important;
+}
+
+.alternate-color {
+  background: #444;
+}
+
+.songs-viewport {
+  width: 100%;
+  height: calc(100vh - 250px);
+}
+
+.songs-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+}
+
+.example-item {
+  height: 50px;
+}

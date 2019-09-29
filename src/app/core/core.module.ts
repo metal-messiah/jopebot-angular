@@ -12,6 +12,7 @@ import { RequestService } from "./services/request.service";
 import { StreamerSettingsService } from "./services/streamer-settings.service";
 import { StreamerSongsService } from "./services/streamer-songs.service";
 import { StreamerUserPrivilegesService } from "./services/streamer-user-privileges.service";
+import { UserGuard } from "./services/user.guard";
 
 @NgModule({
   imports: [CommonModule],
@@ -22,6 +23,7 @@ import { StreamerUserPrivilegesService } from "./services/streamer-user-privileg
     RoutingStateService,
     UpdateService,
     AuthGuard,
+    UserGuard,
     RestService,
     UserService,
     RequestService,

@@ -5,6 +5,8 @@ import { AuthGuard } from "../core/services/auth.guard";
 import { UsersComponent } from "./users.component";
 import { ViewerDashboardComponent } from "./viewer-dashboard/viewer-dashboard.component";
 import { AllUsersComponent } from "./all-users/all-users.component";
+import { UserGuard } from "app/core/services/user.guard";
+import { RequestComponent } from "./request/request.component";
 
 const routes: Routes = [
   {
@@ -18,7 +20,13 @@ const routes: Routes = [
       },
       {
         path: ":userid",
-        component: ViewerDashboardComponent
+        component: ViewerDashboardComponent,
+        canActivate: [UserGuard]
+      },
+      {
+        path: ":userid/request",
+        component: RequestComponent,
+        canActivate: [UserGuard]
       }
     ]
   }

@@ -1,11 +1,12 @@
 import { Entity } from "./entity";
+import { User } from "./user";
 
 export class StreamerSong implements Entity {
   id: number;
-  user_id: number;
-  url: URL;
+  user: User;
+  data: object[];
 
-  created_by: number;
+  createdBy: User;
 
   constructor(obj: StreamerSong) {
     Object.assign(this, obj);

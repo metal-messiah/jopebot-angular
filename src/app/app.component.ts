@@ -1,11 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { AuthService } from "./core/services/auth.service";
-import { ActivatedRoute, Router } from "@angular/router";
-import { RoutingStateService } from "./core/services/routing-state.service";
-import { UpdateService } from "./core/services/update.service";
+import { Router } from "@angular/router";
 import { Location } from "@angular/common";
-// import { AppInfoDialogComponent } from "./shared/app-info-dialog/app-info-dialog.component";
-import { MatDialog } from "@angular/material";
 
 import { trigger, transition, useAnimation } from "@angular/animations";
 import { flipInY, fadeIn, rubberBand, slideInUp } from "ng-animate";
@@ -26,11 +22,7 @@ export class AppComponent implements OnInit {
   constructor(
     private _location: Location,
     private auth: AuthService,
-    private dialog: MatDialog,
-    private route: ActivatedRoute,
-    private router: Router,
-    private routingState: RoutingStateService,
-    private updateService: UpdateService
+    private router: Router
   ) {}
 
   async ngOnInit() {
@@ -54,11 +46,6 @@ export class AppComponent implements OnInit {
 
   login() {
     this.auth.signIn();
-  }
-
-  openAppInfoDialog() {
-    // this.dialog.open(AppInfoDialogComponent);
-    console.log("app info!");
   }
 
   goBack() {
@@ -106,4 +93,3 @@ export class AppComponent implements OnInit {
     }
   }
 }
-console.log("poop");

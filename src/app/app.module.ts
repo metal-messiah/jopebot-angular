@@ -12,7 +12,9 @@ import {
 import {
   faUser,
   faSpinner,
-  faCaretSquareDown
+  faCaretSquareDown,
+  faLink,
+  faPaperclip
 } from "@fortawesome/free-solid-svg-icons";
 import { faTwitch } from "@fortawesome/free-brands-svg-icons";
 
@@ -22,15 +24,17 @@ import { SharedModule } from "./shared/shared.module";
 import { AppRoutingModule } from "./app-routing.module";
 import { HomeComponent } from "./home/home.component";
 import { UsersModule } from "./users/users.module";
+import { MyBotModule } from "./my-bot/my-bot.module";
 
 @NgModule({
   declarations: [AppComponent, HomeComponent],
   imports: [
-    BrowserModule,
     FontAwesomeModule,
+    BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
     UsersModule,
+    MyBotModule,
     ServiceWorkerModule.register("/ngsw-worker.js", {
       enabled: environment.production
     }),

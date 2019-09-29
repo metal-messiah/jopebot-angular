@@ -1,0 +1,32 @@
+<mat-form-field class="fields-form" color="accent" *ngIf="fieldsControl">
+  <mat-select [formControl]="fieldsControl" multiple>
+    <mat-option
+      *ngFor="let field of dataFields"
+      [value]="field"
+      color="accent"
+      checked
+    >
+      {{ field }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+<div class="fields" *ngIf="fieldsControl">
+  <div *ngFor="let field of fieldsControl.value">{{ field }}</div>
+</div>
+<cdk-virtual-scroll-viewport
+  itemSize="10"
+  *ngIf="fieldsControl && songs && songs.data.length > 0"
+  class="songs-viewport"
+>
+  <div
+    class="songs-values"
+    [ngClass]="{ 'alternate-color': i % 2 }"
+    *cdkVirtualFor="let song of songs.data; let i = index"
+  >
+    <div *ngFor="let field of fieldsControl.value">
+      {{ song[field] }}
+    </div>
+  </div>
+</cdk-virtual-scroll-viewport>
+<mat-spinner *ngIf="fetching.songs"></mat-spinner>

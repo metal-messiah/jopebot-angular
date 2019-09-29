@@ -43,12 +43,12 @@
   align-items: center;
 }
 
-.mat-toolbar * {
+* {
   font-family: "Audiowide", cursive;
 }
 
 .auth-button {
-  padding: 0;
+  padding: 5px;
   margin-left: 5px;
 }
 
@@ -60,7 +60,7 @@
   margin-top: 10px;
   text-overflow: ellipsis;
   overflow: hidden;
-  color: black;
+  color: #ff5722;
 }
 
 .auth-action {

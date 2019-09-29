@@ -1,0 +1,10 @@
+<mat-spinner *ngIf="loading"></mat-spinner>
+<div *ngIf="errorMsg">{{ errorMsg }}</div>
+<div>
+  This is where the bot queues will be for the streamer, and links to reset
+  their config stuff
+</div>
+<hr />
+<a [routerLink]="['/bot/settings']">Settings</a>
+<hr />
+<a [routerLink]="['/bot/songs']">Songs</a>

@@ -1,4 +1,25 @@
-.fields-form {
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Audiowide", cursive;
+  color: white;
+  text-align: center;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+  max-width: calc(100% - 20px);
+  margin-left: 10px;
+  margin-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+mat-form-field {
   width: 100%;
 }
 
@@ -16,8 +37,8 @@
   padding: 5px;
   text-overflow: ellipsis;
   width: 100%;
-  border-right: 1px solid black;
-  border-left: 1px solid black;
+  /* border-right: 1px solid black;
+  border-left: 1px solid black; */
 }
 
 .fields {
@@ -41,7 +62,7 @@
 
 .songs-viewport {
   width: 100%;
-  height: calc(100vh - 250px);
+  height: calc(100vh - 325px);
 }
 
 .songs-values {

@@ -1,32 +1,80 @@
-<mat-form-field class="fields-form" color="accent" *ngIf="fieldsControl">
-  <mat-select [formControl]="fieldsControl" multiple>
-    <mat-option
-      *ngFor="let field of dataFields"
-      [value]="field"
-      color="accent"
-      checked
-    >
-      {{ field }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+<h1 *ngIf="songs">{{ songs.user.displayName }}</h1>
+<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p>
 
-<div class="fields" *ngIf="fieldsControl">
-  <div *ngFor="let field of fieldsControl.value">{{ field }}</div>
-</div>
-<cdk-virtual-scroll-viewport
-  itemSize="10"
-  *ngIf="fieldsControl && songs && songs.data.length > 0"
-  class="songs-viewport"
->
-  <div
-    class="songs-values"
-    [ngClass]="{ 'alternate-color': i % 2 }"
-    *cdkVirtualFor="let song of songs.data; let i = index"
-  >
-    <div *ngFor="let field of fieldsControl.value">
-      {{ song[field] }}
+<mat-horizontal-stepper [linear]="true">
+  <mat-step
+    ><ng-template matStepLabel>Select Request Type</ng-template>
+  </mat-step>
+  <!-- STEP FOR SELECTING SONG FROM FILE -->
+  <mat-step>
+    <ng-template matStepLabel>Select From File</ng-template>
+    <mat-form-field class="text-form" color="accent" *ngIf="textControl">
+      <input matInput placeholder="Search" [formControl]="textControl" />
+      <mat-hint *ngIf="display.length"
+        >{{ display.length | number }} Matching Records</mat-hint
+      >
+    </mat-form-field>
+
+    <mat-form-field class="fields-form" color="accent" *ngIf="fieldsControl">
+      <mat-select
+        (blur)="onBlur()"
+        (focus)="onFocus()"
+        [formControl]="fieldsControl"
+        multiple
+      >
+        <mat-select-trigger>
+          {{
+            "Showing " +
+              fieldsControl.value.length +
+              "/" +
+              dataFields.length +
+              " Fields"
+          }}
+        </mat-select-trigger>
+        <mat-option
+          *ngFor="let field of dataFields"
+          [value]="field"
+          color="accent"
+          checked
+        >
+          {{ field }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="fields" *ngIf="fieldsControl">
+      <div
+        *ngFor="let field of fieldsControl.value"
+        [ngStyle]="{ maxWidth: getRowWidth() }"
+      >
+        {{ field }}
+      </div>
     </div>
-  </div>
-</cdk-virtual-scroll-viewport>
-<mat-spinner *ngIf="fetching.songs"></mat-spinner>
+    <cdk-virtual-scroll-viewport
+      itemSize="10"
+      *ngIf="fieldsControl && !selectIsOpen && display.length > 0"
+      class="songs-viewport"
+    >
+      <div
+        class="songs-values"
+        [ngClass]="{ 'alternate-color': i % 2 }"
+        *cdkVirtualFor="let song of display; let i = index"
+        (click)="onSongClick(song)"
+      >
+        <div
+          *ngFor="let field of fieldsControl.value"
+          [ngStyle]="{ maxWidth: getRowWidth() }"
+        >
+          {{ song[field] }}
+        </div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+    <mat-spinner *ngIf="fetching.songs"></mat-spinner>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Custom Message</ng-template>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Additional Information</ng-template>
+  </mat-step>
+</mat-horizontal-stepper>

@@ -18,7 +18,6 @@ export class OwnedGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    console.log("OWNED GUARD!");
     if (next.params.requestid) {
       return this.requestService.isOwned(next.params.requestid);
     }

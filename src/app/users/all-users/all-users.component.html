@@ -1,13 +1,42 @@
 <div class="item-container">
-  <div class="item-card" [routerLink]="user.id" *ngFor="let user of users">
+  <mat-form-field
+    class="text-form"
+    color="accent"
+    *ngIf="textControl && (onlineDisplay.length || offlineDisplay.length)"
+  >
+    <input matInput placeholder="Search For User" [formControl]="textControl" />
+    <mat-hint *ngIf="onlineDisplay.length || offlineDisplay.length"
+      >{{ onlineDisplay.length + offlineDisplay.length | number }} Matching
+      Records</mat-hint
+    >
+  </mat-form-field>
+</div>
+<div class="item-container">
+  <div
+    class="item-card online"
+    [routerLink]="user.id"
+    *ngFor="let user of onlineDisplay"
+  >
     <div class="item-card-title">{{ user.displayName }}</div>
     <div
       class="item-card-logo"
-      [ngStyle]="{ backgroundImage: 'url(' + user.logo + ')' }"
+      [ngStyle]="{
+        backgroundImage: getLogo(user)
+      }"
     ></div>
   </div>
-  <mat-spinner
-    color="accent"
-    *ngIf="!authService.currentUser || !users.length"
-  ></mat-spinner>
+  <div
+    class="item-card"
+    [routerLink]="user.id"
+    *ngFor="let user of offlineDisplay"
+  >
+    <div class="item-card-title">{{ user.displayName }}</div>
+    <div
+      class="item-card-logo"
+      [ngStyle]="{
+        backgroundImage: getLogo(user)
+      }"
+    ></div>
+  </div>
 </div>
+<mat-spinner color="accent" *ngIf="initializing"></mat-spinner>

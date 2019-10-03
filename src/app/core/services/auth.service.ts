@@ -20,7 +20,6 @@ export class AuthService {
     private rest: RestService,
     private storageService: StorageService
   ) {
-    console.log("AUTH SERVICE!");
     this.storageService.getOne("currentUser").subscribe((user: User) => {
       this.currentUser = user;
     });

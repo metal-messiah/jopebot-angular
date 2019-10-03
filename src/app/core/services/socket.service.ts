@@ -9,7 +9,6 @@ export class SocketService {
   refreshDatasets$: Subject<void> = new Subject<void>();
 
   constructor(private http: HttpClient, private rest: RestService) {
-    console.log("*********** SOCKET SERVICE **************");
     this.io = io({ autoConnect: false });
   }
 
@@ -43,5 +42,10 @@ export class SocketService {
   destroyRoom(userId: number): Observable<void> {
     const url = this.rest.getHost() + `/api/socket/${userId}`;
     return this.http.delete<void>(url, { withCredentials: true });
+  }
+
+  getRoomIds(): Observable<number[]> {
+    const url = this.rest.getHost() + `/api/socket`;
+    return this.http.get<number[]>(url, { withCredentials: true });
   }
 }

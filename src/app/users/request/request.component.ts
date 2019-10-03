@@ -1,26 +1,10 @@
-import {
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  NgZone
-} from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import eh from "../../interfaces/error-handler";
 import { StreamerSongsService } from "app/core/services/streamer-songs.service";
 import { StreamerSong } from "app/models/streamer-song";
-import {
-  FormGroup,
-  FormBuilder,
-  FormControl,
-  Validators
-} from "@angular/forms";
+import { FormControl, Validators } from "@angular/forms";
 
-import {
-  debounce,
-  debounceTime,
-  delay,
-  finalize
-} from "rxjs/internal/operators";
+import { debounceTime } from "rxjs/internal/operators";
 
 import * as Fuse from "fuse.js";
 import { UserService } from "app/core/services/user.service";
@@ -97,7 +81,6 @@ export class RequestComponent implements OnInit {
     this.requestService
       .getOneById(this.requestIdParam)
       .subscribe((request: Request) => {
-        console.log(request);
         this.customMessageControl.setValue(request.message);
         this.linkControl.setValue(request.link);
         this.selectedSong = request.song ? JSON.parse(request.song) : null;
@@ -113,12 +96,16 @@ export class RequestComponent implements OnInit {
           this.songs = resp.length ? resp[0] : null;
           this.fetching.songs = false;
 
-          this.dataFields = Object.keys(
-            this.songs.data.length ? this.songs.data[0] : this.songs.data
-          );
-          this.display = this.songs.data.length
-            ? this.songs.data
-            : [this.songs.data];
+          this.dataFields = this.songs
+            ? Object.keys(
+                this.songs.data.length ? this.songs.data[0] : this.songs.data
+              )
+            : [];
+          this.display = this.songs
+            ? this.songs.data.length
+              ? this.songs.data
+              : [this.songs.data]
+            : [];
 
           // by default show 6 fields
           this.fieldsControl = new FormControl(this.dataFields.slice(0, 4), [
@@ -145,7 +132,7 @@ export class RequestComponent implements OnInit {
     if (term) {
       const options = {
         shouldSort: true,
-        threshold: 0.6,
+        threshold: 0.4,
         location: 0,
         distance: 100,
         maxPatternLength: 32,
@@ -184,7 +171,9 @@ export class RequestComponent implements OnInit {
       ? JSON.stringify(this.selectedSong)
       : null;
     const link: URL = this.linkControl.valid ? this.linkControl.value : null;
-    const message: string = this.customMessageControl.value;
+    const message: string = this.customMessageControl.value
+      ? this.customMessageControl.value
+      : null;
 
     this.userService
       .getOneById(this.streamerIdParam)
@@ -194,8 +183,8 @@ export class RequestComponent implements OnInit {
           message: message || null,
           user: this.authService.currentUser,
           streamer: user,
-          song,
-          link
+          song: song,
+          link: link
         };
         const request = new Request(options);
 

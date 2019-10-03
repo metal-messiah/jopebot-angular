@@ -7,6 +7,8 @@ import { ViewerDashboardComponent } from "./viewer-dashboard/viewer-dashboard.co
 import { AllUsersComponent } from "./all-users/all-users.component";
 import { UserGuard } from "app/core/services/user.guard";
 import { RequestComponent } from "./request/request.component";
+import { OwnedGuard } from "app/core/services/owned.guard";
+import { SocketGuard } from "app/core/services/socket.guard";
 
 const routes: Routes = [
   {
@@ -21,12 +23,17 @@ const routes: Routes = [
       {
         path: ":userid",
         component: ViewerDashboardComponent,
-        canActivate: [UserGuard]
+        canActivate: [UserGuard, SocketGuard]
       },
       {
         path: ":userid/request",
         component: RequestComponent,
         canActivate: [UserGuard]
+      },
+      {
+        path: ":userid/request/:requestid",
+        component: RequestComponent,
+        canActivate: [UserGuard, OwnedGuard]
       }
     ]
   }

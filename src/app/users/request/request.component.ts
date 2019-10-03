@@ -4,7 +4,7 @@ import {
   ChangeDetectionStrategy,
   NgZone
 } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import eh from "../../interfaces/error-handler";
 import { StreamerSongsService } from "app/core/services/streamer-songs.service";
 import { StreamerSong } from "app/models/streamer-song";
@@ -23,6 +23,13 @@ import {
 } from "rxjs/internal/operators";
 
 import * as Fuse from "fuse.js";
+import { UserService } from "app/core/services/user.service";
+import { User } from "app/models/user";
+import { AuthService } from "app/core/services/auth.service";
+import { Request } from "app/models/request";
+import { RequestService } from "app/core/services/request.service";
+
+import { Location } from "@angular/common";
 
 @Component({
   selector: "app-request",
@@ -31,35 +38,70 @@ import * as Fuse from "fuse.js";
 })
 export class RequestComponent implements OnInit {
   streamerIdParam;
+  requestIdParam;
+
   fetching = { songs: false };
+  submitting = false;
   songs: StreamerSong;
 
   display: any[] = [];
 
   selectIsOpen = false;
 
+  selectedSong;
+
   dataFields: string[] = [];
 
   fieldsControl: FormControl;
   textControl: FormControl;
+  customMessageControl: FormControl;
+  linkControl: FormControl;
 
   fuse: Fuse<any>;
 
   constructor(
     private route: ActivatedRoute,
-    private streamerSongsService: StreamerSongsService
+    private router: Router,
+    private streamerSongsService: StreamerSongsService,
+    private userService: UserService,
+    private authService: AuthService,
+    private requestService: RequestService,
+    private location: Location
   ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(async params => {
       this.streamerIdParam = params.get("userid");
+      this.requestIdParam = params.get("requestid");
+      if (this.requestIdParam) {
+        this.populateForms();
+      }
       this.fetchSongs();
     });
 
-    this.textControl = new FormControl("", [Validators.required]);
+    this.textControl = new FormControl("");
     this.textControl.valueChanges.pipe(debounceTime(500)).subscribe(val => {
       this.search(val);
     });
+
+    this.customMessageControl = new FormControl("", [Validators.required]);
+    this.linkControl = new FormControl("", [
+      Validators.required,
+      Validators.pattern(
+        "(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?"
+      )
+    ]);
+  }
+
+  populateForms() {
+    this.requestService
+      .getOneById(this.requestIdParam)
+      .subscribe((request: Request) => {
+        console.log(request);
+        this.customMessageControl.setValue(request.message);
+        this.linkControl.setValue(request.link);
+        this.selectedSong = request.song ? JSON.parse(request.song) : null;
+      });
   }
 
   async fetchSongs() {
@@ -67,18 +109,22 @@ export class RequestComponent implements OnInit {
     this.streamerSongsService
       .getAll({ user_id: this.streamerIdParam })
       .subscribe((resp: StreamerSong[]) => {
-        this.songs = resp.length ? resp[0] : null;
-        this.fetching.songs = false;
+        if (resp) {
+          this.songs = resp.length ? resp[0] : null;
+          this.fetching.songs = false;
 
-        this.dataFields = Object.keys(this.songs.data[0]);
-        this.display = this.songs.data;
-        console.log(this.display.length);
+          this.dataFields = Object.keys(
+            this.songs.data.length ? this.songs.data[0] : this.songs.data
+          );
+          this.display = this.songs.data.length
+            ? this.songs.data
+            : [this.songs.data];
 
-        // by default show 6 fields
-        this.fieldsControl = new FormControl(this.dataFields.slice(0, 4), [
-          Validators.required
-        ]);
-
+          // by default show 6 fields
+          this.fieldsControl = new FormControl(this.dataFields.slice(0, 4), [
+            Validators.required
+          ]);
+        }
         this.fetching.songs = false;
       });
   }
@@ -96,20 +142,74 @@ export class RequestComponent implements OnInit {
   }
 
   search(term: string) {
-    const options = {
-      shouldSort: true,
-      threshold: 0.6,
-      location: 0,
-      distance: 100,
-      maxPatternLength: 32,
-      minMatchCharLength: 1,
-      keys: this.dataFields
-    };
-    this.fuse = new Fuse(this.songs.data, options); // "list" is the item array
-    this.display = this.fuse.search(term);
+    if (term) {
+      const options = {
+        shouldSort: true,
+        threshold: 0.6,
+        location: 0,
+        distance: 100,
+        maxPatternLength: 32,
+        minMatchCharLength: 1,
+        keys: this.dataFields
+      };
+      this.fuse = new Fuse(this.songs.data, options); // "list" is the item array
+      this.display = this.fuse.search(term);
+    } else {
+      this.display = this.songs.data.length
+        ? this.songs.data
+        : [this.songs.data];
+    }
   }
 
   onSongClick(song: any) {
-    console.log(`Click on Song ${song.songName}`);
+    this.selectedSong = song;
+  }
+
+  isSong(song: any) {
+    return JSON.stringify(this.selectedSong) === JSON.stringify(song);
+  }
+
+  shouldDisableNewRequest(): boolean {
+    return (
+      this.submitting ||
+      (!this.selectedSong &&
+        !this.customMessageControl.valid &&
+        !this.linkControl.valid)
+    );
+  }
+
+  submitNewRequest() {
+    this.submitting = true;
+    const song: string = this.selectedSong
+      ? JSON.stringify(this.selectedSong)
+      : null;
+    const link: URL = this.linkControl.valid ? this.linkControl.value : null;
+    const message: string = this.customMessageControl.value;
+
+    this.userService
+      .getOneById(this.streamerIdParam)
+      .subscribe((user: User) => {
+        const options = {
+          id: this.requestIdParam,
+          message: message || null,
+          user: this.authService.currentUser,
+          streamer: user,
+          song,
+          link
+        };
+        const request = new Request(options);
+
+        if (request.id) {
+          this.requestService.update(request).subscribe(resp => {
+            // console.log(this.route, this.router);
+            this.router.navigate(["/users", this.streamerIdParam]);
+          });
+        } else {
+          this.requestService.create(request).subscribe(resp => {
+            // console.log(this.route, this.router);
+            this.router.navigate(["/users", this.streamerIdParam]);
+          });
+        }
+      });
   }
 }

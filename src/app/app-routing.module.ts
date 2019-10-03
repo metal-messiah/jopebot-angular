@@ -4,9 +4,10 @@ import { RouterModule, Routes } from "@angular/router";
 import { CallbackComponent } from "./shared/callback/callback.component";
 import { PathNotFoundComponent } from "./shared/path-not-found/path-not-found.component";
 import { CanDeactivateGuard } from "./core/services/can-deactivate.guard";
+import { SocketGuard } from "./core/services/socket.guard";
 
 export const routes: Routes = [
-  { path: "", component: HomeComponent },
+  { path: "", component: HomeComponent, canActivate: [SocketGuard] },
   { path: "home", redirectTo: "/" },
   { path: "callback", component: CallbackComponent },
   { path: "**", component: PathNotFoundComponent }

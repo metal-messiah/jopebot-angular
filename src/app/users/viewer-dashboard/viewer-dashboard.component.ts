@@ -16,6 +16,10 @@ import eh from "../../interfaces/error-handler";
 import { trigger, transition, useAnimation } from "@angular/animations";
 import { zoomIn } from "ng-animate";
 import { StreamerSong } from "app/models/streamer-song";
+import { MatDialog } from "@angular/material";
+import { ConfirmDialogComponent } from "app/shared/confirm-dialog/confirm-dialog.component";
+import { DisplayDialogComponent } from "app/shared/display-dialog/display-dialog.component";
+import { SocketService } from "app/core/services/socket.service";
 @Component({
   selector: "app-viewer-dashboard",
   templateUrl: "./viewer-dashboard.component.html",
@@ -27,6 +31,8 @@ export class ViewerDashboardComponent implements OnInit {
   userFromId: User;
   errorMsg: string;
 
+  menuTarget: Request;
+
   fetching = {
     requestQueue: false,
     playedRequests: false,
@@ -37,8 +43,9 @@ export class ViewerDashboardComponent implements OnInit {
   playedRequests: Request[] = [];
   songs: StreamerSong;
 
-  downloadWarning = `CAUTION! SPOOPY! 
-        These links could point anywhere, are provided by random people on the internet, and are in no way affiliated with JopeBot.  Proceed with caution.`;
+  downloadWarning = `These links could point anywhere, are provided by random people on the internet, and are in no way affiliated with JopeBot.
+  
+  Do You Wish To Continue?`;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -46,11 +53,9 @@ export class ViewerDashboardComponent implements OnInit {
     private authService: AuthService,
     private userService: UserService,
     private requestService: RequestService,
-    private streamerSettingsService: StreamerSettingsService,
     private streamerSongsService: StreamerSongsService,
-    private streamerUserPrivilegesService: StreamerUserPrivilegesService,
-    private formBuilder: FormBuilder,
-    private httpClient: HttpClient
+    private dialog: MatDialog,
+    private socketService: SocketService
   ) {}
 
   async ngOnInit() {
@@ -59,11 +64,18 @@ export class ViewerDashboardComponent implements OnInit {
       this.streamerIdParam = params.get("userid");
       await this.getUserFromId(this.streamerIdParam);
       if (this.userFromId) {
-        this.updateRequestQueue();
-        this.updatePlayedRequests();
-        this.updateSongs();
+        this.refreshData();
       }
     });
+
+    // subscribe to socket refresh!
+    this.socketService.refreshDatasets$.subscribe(() => {
+      this.refreshData();
+    });
+  }
+
+  refreshData() {
+    this.getAllRequests();
   }
 
   async getUserFromId(id: string | number) {
@@ -93,32 +105,22 @@ export class ViewerDashboardComponent implements OnInit {
     });
   }
 
-  async updateRequestQueue() {
+  async getAllRequests() {
     this.fetching.requestQueue = true;
-    this.requestQueue = await this.requestService
-      .getAll({ streamer_id: this.streamerIdParam, played: null })
-      .toPromise();
-    this.sortByDateField(this.requestQueue, "createdAt", true);
-    this.fetching.requestQueue = false;
-  }
-
-  async updatePlayedRequests() {
     this.fetching.playedRequests = true;
-    this.playedRequests = await this.requestService
-      .getAll({ streamer_id: this.streamerIdParam, "played !=": null })
-      .toPromise();
-    this.sortByDateField(this.playedRequests, "played", false);
-    this.fetching.playedRequests = false;
-  }
 
-  async updateSongs() {
-    console.log("update songs");
-    this.fetching.songs = true;
-    const resp = await this.streamerSongsService
-      .getAll({ user_id: this.streamerIdParam })
+    const allRequests = await this.requestService
+      .getAll({ streamer_id: this.streamerIdParam })
       .toPromise();
-    this.songs = resp.length ? resp[0] : null;
-    this.fetching.songs = false;
+
+    this.requestQueue = allRequests.filter(r => !r.played);
+    this.playedRequests = allRequests.filter(r => r.played);
+
+    this.sortByDateField(this.requestQueue, "createdAt", true);
+    this.sortByDateField(this.playedRequests, "played", false);
+
+    this.fetching.requestQueue = false;
+    this.fetching.playedRequests = false;
   }
 
   shouldDisableMenu(request: Request) {
@@ -126,15 +128,16 @@ export class ViewerDashboardComponent implements OnInit {
   }
 
   openLink(link: string) {
-    if (confirm(this.downloadWarning)) {
-      window.open(link, "_blank");
-    }
-  }
-
-  downloadAttachment(attachment: string) {
-    if (confirm(this.downloadWarning)) {
-      window.open(attachment, "_blank");
-    }
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: { title: "Caution! SpOOpy!", question: this.downloadWarning }
+      })
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          window.open(link, "_blank");
+        }
+      });
   }
 
   scrollTo(elemId: string) {
@@ -144,5 +147,57 @@ export class ViewerDashboardComponent implements OnInit {
 
   newRequest() {
     this.router.navigate(["request"], { relativeTo: this.route });
+  }
+
+  showSongInfo(song: string) {
+    if (song) {
+      const json = JSON.parse(song);
+      const content = Object.keys(json)
+        .map(key => `${key}: ${json[key]}`)
+        .join("\n");
+      this.dialog
+        .open(DisplayDialogComponent, { data: { title: "Info", content } })
+        .afterClosed()
+        .subscribe(result => {
+          if (result) {
+          }
+        });
+    }
+  }
+
+  getRequestMessage(request: Request) {
+    if (request.message) return request.message;
+
+    if (request.song) {
+      const json = JSON.parse(request.song);
+      if (json.Name) return json.Name;
+      if (json.name) return json.name;
+      if (json.songName) return json.songName;
+
+      return json[Object.keys(json)[0]];
+    }
+
+    if (request.link) {
+      return request.link;
+    }
+  }
+
+  setMenuTarget(request: Request) {
+    this.menuTarget = request;
+  }
+
+  editRequest() {
+    const targetRequest: Request = this.menuTarget;
+    this.router.navigate(["request", targetRequest.id], {
+      relativeTo: this.route
+    });
+  }
+
+  deleteRequest() {
+    const targetRequest: Request = this.menuTarget;
+    this.requestService.delete(targetRequest.id).subscribe(() => {
+      console.log("Deleted Request!");
+      this.refreshData();
+    });
   }
 }

@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    await this.auth.isAuthenticated().toPromise();
+    this.auth.isAuthenticated();
     this.checkedLogin = true;
   }
 

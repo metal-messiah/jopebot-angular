@@ -20,7 +20,14 @@ h5 {
 }
 
 mat-form-field {
-  width: 100%;
+  margin: 0 25px;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .fields {
@@ -48,6 +55,7 @@ mat-form-field {
 
 .songs-values {
   font-size: small;
+  border-radius: 5px;
 }
 
 .songs-values:hover {
@@ -56,13 +64,20 @@ mat-form-field {
   color: black !important;
 }
 
+.highlighted {
+  background: #ffcb00 !important;
+  color: black !important;
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 0 10px 2px inset orange;
+}
+
 .alternate-color {
   background: #444;
 }
 
 .songs-viewport {
   width: 100%;
-  height: calc(100vh - 325px);
+  height: calc(100vh - 500px);
 }
 
 .songs-values {
@@ -74,4 +89,20 @@ mat-form-field {
 
 .example-item {
   height: 50px;
+}
+
+mat-spinner {
+  margin: 0 auto;
+}
+
+mat-panel-description {
+  text-align: right;
+}
+
+.mat-expansion-panel-header-description {
+  display: block;
+}
+
+.submit-request {
+  margin-top: 25px;
 }

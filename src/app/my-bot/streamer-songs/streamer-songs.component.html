@@ -1,10 +1,26 @@
-<form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
-  <div>
-    <input type="file" name="songs" (change)="onFileSelect($event)" />
-  </div>
-  <div>
-    <button type="submit">Upload</button>
-  </div>
-</form>
+<h1>Searchable JSON File For Requests</h1>
+<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p>
 
-<span>{{ msg }}</span>
+<form [formGroup]="uploadForm">
+  <div>
+    <input
+      #fileInput
+      type="file"
+      name="songs"
+      (change)="onFileSelect($event)"
+      accept=".json"
+      hidden
+    />
+  </div>
+  <button
+    matButton
+    mat-flat-button
+    color="accent"
+    (click)="fileInput.click()"
+    [disabled]="loading"
+  >
+    {{ buttonText }}
+    <i class="fas fa-spinner fa-pulse" *ngIf="loading"></i>
+  </button>
+  <div class="small-text" *ngIf="!loading">{{ msg }}</div>
+</form>

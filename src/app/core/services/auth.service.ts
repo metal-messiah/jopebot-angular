@@ -9,23 +9,26 @@ import { MatDialog } from "@angular/material/dialog";
 import { forkJoin, Observable } from "rxjs";
 import { map, mergeMap } from "rxjs/operators";
 import { User } from "app/models/user";
+import { StorageService } from "./storage.service";
 
 @Injectable()
 export class AuthService {
   private _currentUser: User;
 
   constructor(
-    private router: Router,
-    private location: Location,
     private http: HttpClient,
     private rest: RestService,
-    private dialog: MatDialog
+    private storageService: StorageService
   ) {
     console.log("AUTH SERVICE!");
+    this.storageService.getOne("currentUser").subscribe((user: User) => {
+      this.currentUser = user;
+    });
+
     this.fetchCurrentUserFromDB().subscribe((user: User) => {
       if (user) {
         this.currentUser = user;
-        console.log("set current user!");
+        this.storageService.set("currentUser", this.currentUser);
       }
     });
   }
@@ -34,7 +37,6 @@ export class AuthService {
     const path = `${this.rest.getHost()}/api/auth${
       target ? `?target=${encodeURI(target)}` : ""
     }`;
-    console.log(path);
     window.location.href = path;
   }
 

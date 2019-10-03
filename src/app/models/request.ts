@@ -2,22 +2,23 @@ import { Entity } from "./entity";
 import { User } from "./user";
 
 export class Request implements Entity {
-  id: number;
-  createdAt: Date;
-  createdBy: User;
-  channel: string;
-  message: string;
-  user: User;
-  streamer: User;
-  logo?: URL;
-  self: boolean;
+  id?: number;
+  createdAt?: Date;
+  createdBy?: User;
+  updatedAt?: Date;
+  user?: User;
+  streamer?: User;
+  self?: boolean;
 
-  attachment: File;
-  link: URL;
-  played: Date;
+  message?: string;
+  song?: string;
+  link?: URL;
+
+  played?: Date;
 
   constructor(obj: Request) {
     Object.assign(this, obj);
+
     if (obj.createdBy) {
       this.createdBy = new User(obj.createdBy);
     }
@@ -26,6 +27,13 @@ export class Request implements Entity {
     }
     if (obj.user) {
       this.user = new User(obj.user);
+    }
+
+    if (obj.createdAt) {
+      this.createdAt = new Date(obj.createdAt);
+    }
+    if (obj.updatedAt) {
+      this.updatedAt = new Date(obj.updatedAt);
     }
   }
 }

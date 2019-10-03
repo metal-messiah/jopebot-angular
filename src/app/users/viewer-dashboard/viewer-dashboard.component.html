@@ -17,30 +17,32 @@
         *ngFor="let request of requestQueue; let i = index"
         [matBadge]="i + 1"
         matBadgePosition="before"
-        [@zoomIn]="zoomIn"
       >
         <div class="item-card-row">
-          <div class="item-card-title">{{ request.message }}</div>
+          <div class="item-card-title">{{ getRequestMessage(request) }}</div>
           <div
             class="item-card-logo"
             [ngStyle]="{
               backgroundImage: 'url(' + request.createdBy.logo + ')'
             }"
+            [matTooltip]="request.user.displayName"
+            matTooltipPosition="left"
           ></div>
         </div>
         <div class="item-card-row">
           <div class="item-card-date">
             {{ request.createdAt | date: "medium" }}
           </div>
+
           <button
             mat-icon-button
             color="warn"
-            [disabled]="!request.attachment"
-            (click)="downloadAttachment(request.attachment)"
-            matTooltip="Go to Attachment"
+            [disabled]="!request.song"
+            (click)="showSongInfo(request.song)"
+            matTooltip="Show Song Info"
             matTooltipPosition="left"
           >
-            <i class="fas fa-paperclip"></i>
+            <i class="fas fa-music"></i>
           </button>
           <button
             mat-icon-button
@@ -58,6 +60,7 @@
             [disabled]="shouldDisableMenu(request)"
             matTooltip="More Actions"
             matTooltipPosition="right"
+            (click)="setMenuTarget(request)"
           >
             <i class="fas fa-ellipsis-v"></i>
           </button>
@@ -82,15 +85,16 @@
         *ngFor="let request of playedRequests; let i = index"
         [matBadge]="playedRequests.length - i"
         matBadgePosition="before"
-        [@zoomIn]="zoomIn"
       >
         <div class="item-card-row">
-          <div class="item-card-title">{{ request.message }}</div>
+          <div class="item-card-title">{{ getRequestMessage(request) }}</div>
           <div
             class="item-card-logo"
             [ngStyle]="{
               backgroundImage: 'url(' + request.createdBy.logo + ')'
             }"
+            [matTooltip]="request.user.displayName"
+            matTooltipPosition="left"
           ></div>
         </div>
         <div class="item-card-row">
@@ -100,12 +104,12 @@
           <button
             mat-icon-button
             color="warn"
-            [disabled]="!request.attachment"
-            (click)="downloadAttachment(request.attachment)"
-            matTooltip="Go to Attachment"
+            [disabled]="!request.song"
+            (click)="showSongInfo(request.song)"
+            matTooltip="Show Song Info"
             matTooltipPosition="left"
           >
-            <i class="fas fa-paperclip"></i>
+            <i class="fas fa-music"></i>
           </button>
           <button
             mat-icon-button
@@ -117,15 +121,6 @@
           >
             <i class="fas fa-link"></i>
           </button>
-          <button
-            mat-icon-button
-            [matMenuTriggerFor]="itemCardMenu"
-            [disabled]="shouldDisableMenu(request)"
-            matTooltip="More Actions"
-            matTooltipPosition="right"
-          >
-            <i class="fas fa-ellipsis-v"></i>
-          </button>
         </div>
       </div>
     </div>
@@ -136,11 +131,11 @@
   </button>
 
   <mat-menu #itemCardMenu="matMenu" yPosition="below" xPosition="after">
-    <button mat-menu-item>
-      Edit
+    <button mat-menu-item (click)="editRequest()">
+      <i class="fas fa-edit"></i> Edit
     </button>
-    <button mat-menu-item>
-      Delete
+    <button mat-menu-item (click)="deleteRequest()">
+      <i class="fas fa-trash-alt"></i> Delete
     </button>
   </mat-menu>
 
@@ -166,13 +161,5 @@
     matTooltipPosition="above"
   >
     <i class="fas fa-clipboard-check"></i>
-  </button>
-  <button
-    mat-flat-button
-    (click)="scrollTo('songs')"
-    matTooltip="Songs List"
-    matTooltipPosition="above"
-  >
-    <i class="fas fa-music"></i>
   </button>
 </mat-toolbar>

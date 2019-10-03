@@ -4,7 +4,7 @@ import { Entity } from "../models/entity";
 import { Observable } from "rxjs";
 import { map } from "rxjs/internal/operators";
 
-export abstract class CrudService<T extends Entity> {
+export abstract class CrudService<T> {
   protected abstract endpoint;
 
   protected constructor(
@@ -27,7 +27,6 @@ export abstract class CrudService<T extends Entity> {
 
   getOneById(id: number | string): Observable<T> {
     const url = this.rest.getHost() + this.endpoint + `/${id}`;
-    console.log(url);
     return this.http
       .get<T>(url, {
         headers: this.rest.getHeaders(),
@@ -51,7 +50,6 @@ export abstract class CrudService<T extends Entity> {
     }
 
     const url = this.rest.getHost() + this.endpoint + `${queryString}`;
-    console.log(url);
     return this.http
       .get<T[]>(url, {
         headers: this.rest.getHeaders(),
@@ -61,7 +59,7 @@ export abstract class CrudService<T extends Entity> {
   }
 
   update(updatedEntity: T): Observable<T> {
-    const url = this.rest.getHost() + this.endpoint;
+    const url = this.rest.getHost() + this.endpoint + "/" + updatedEntity["id"];
     return this.http
       .put<T>(url, updatedEntity, {
         headers: this.rest.getHeaders(),
@@ -80,6 +78,14 @@ export abstract class CrudService<T extends Entity> {
 
   exists(id: number): Observable<boolean> {
     const url = this.rest.getHost() + this.endpoint + `/${id}/exists`;
+    return this.http.get<boolean>(url, {
+      headers: this.rest.getHeaders(),
+      withCredentials: true
+    });
+  }
+
+  isOwned(id: number): Observable<boolean> {
+    const url = this.rest.getHost() + this.endpoint + `/${id}/is-owned`;
     return this.http.get<boolean>(url, {
       headers: this.rest.getHeaders(),
       withCredentials: true

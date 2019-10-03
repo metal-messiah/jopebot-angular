@@ -13,6 +13,10 @@ import { StreamerSettingsService } from "./services/streamer-settings.service";
 import { StreamerSongsService } from "./services/streamer-songs.service";
 import { StreamerUserPrivilegesService } from "./services/streamer-user-privileges.service";
 import { UserGuard } from "./services/user.guard";
+import { OwnedGuard } from "./services/owned.guard";
+import { SocketGuard } from "./services/socket.guard";
+import { SocketService } from "./services/socket.service";
+import { StorageService } from "./services/storage.service";
 
 @NgModule({
   imports: [CommonModule],
@@ -24,6 +28,10 @@ import { UserGuard } from "./services/user.guard";
     UpdateService,
     AuthGuard,
     UserGuard,
+    OwnedGuard,
+    SocketGuard,
+    SocketService,
+    StorageService,
     RestService,
     UserService,
     RequestService,

@@ -7,6 +7,7 @@ import {
 import { AuthService } from "./auth.service";
 import { Observable, of } from "rxjs";
 import { tap } from "rxjs/operators";
+import { User } from "app/models/user";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -16,13 +17,32 @@ export class AuthGuard implements CanActivate {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    return this.authService.isAuthenticated().pipe(
-      tap(authenticated => {
-        console.log("IS AUTHENTICATED? ", authenticated);
-        if (!authenticated) {
-          this.authService.signIn(state.url);
-        }
-      })
-    );
+    if (this.authService.currentUser) {
+      return this.authService.isAuthenticated().pipe(
+        tap(authenticated => {
+          if (!authenticated) {
+            this.authService.signIn(state.url);
+          }
+        })
+      );
+    } else {
+      const promise: Promise<boolean> = new Promise((resolve, reject) => {
+        this.authService.fetchCurrentUserFromDB().subscribe((user: User) => {
+          if (user) {
+            this.authService
+              .isAuthenticated()
+              .subscribe((authenticated: boolean) => {
+                if (!authenticated) {
+                  this.authService.signIn(state.url);
+                }
+                resolve(authenticated);
+              });
+          } else {
+            resolve(false);
+          }
+        });
+      });
+      return promise;
+    }
   }
 }

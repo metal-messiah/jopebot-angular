@@ -55,6 +55,7 @@
     "popper.js": "^1.14.3",
     "rxjs": "^6.5.2",
     "sha.js": "^2.4.11",
+    "socket.io-client": "^2.3.0",
     "web-animations-js": "^2.3.2",
     "xlsx": "^0.14.0",
     "zone.js": "~0.9.1"

@@ -6,16 +6,18 @@ import { MyBotComponent } from "./my-bot.component";
 import { StreamerSettingsComponent } from "./streamer-settings/streamer-settings.component";
 import { StreamerSongsComponent } from "./streamer-songs/streamer-songs.component";
 import { BotComponent } from "./bot/bot.component";
+import { SocketGuard } from "app/core/services/socket.guard";
 
 const routes: Routes = [
   {
     path: "bot",
     component: MyBotComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, SocketGuard],
     children: [
       {
         path: "",
-        component: BotComponent
+        component: BotComponent,
+        canActivate: [SocketGuard]
       },
       {
         path: "settings",

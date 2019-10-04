@@ -1,0 +1,29 @@
+* {
+  box-sizing: border-box;
+}
+
+form {
+  width: 100%;
+  background: #777;
+  padding: 10px 20px;
+  min-height: calc(100vh - 150px);
+  border-radius: 10px;
+  position: relative;
+}
+
+mat-form-field {
+  width: calc(100% - 75px);
+}
+
+mat-spinner {
+  margin: 0 auto;
+}
+
+.mat-form-field.mat-focused .mat-form-field-label {
+  color: #ffab40 !important;
+}
+
+form > button {
+  position: fixed;
+  right: 20px;
+}

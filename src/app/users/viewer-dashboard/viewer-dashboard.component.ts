@@ -20,6 +20,7 @@ import { MatDialog } from "@angular/material";
 import { ConfirmDialogComponent } from "app/shared/confirm-dialog/confirm-dialog.component";
 import { DisplayDialogComponent } from "app/shared/display-dialog/display-dialog.component";
 import { SocketService } from "app/core/services/socket.service";
+import { StreamerSettings } from "app/models/streamer-settings";
 @Component({
   selector: "app-viewer-dashboard",
   templateUrl: "./viewer-dashboard.component.html",
@@ -43,6 +44,9 @@ export class ViewerDashboardComponent implements OnInit {
   playedRequests: Request[] = [];
   songs: StreamerSong;
 
+  streamerSettings: StreamerSettings;
+  userRequests: number = 0;
+
   downloadWarning = `These links could point anywhere, are provided by random people on the internet, and are in no way affiliated with JopeBot.
   
   Do You Wish To Continue?`;
@@ -55,7 +59,8 @@ export class ViewerDashboardComponent implements OnInit {
     private requestService: RequestService,
     private streamerSongsService: StreamerSongsService,
     private dialog: MatDialog,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private streamerSettingsService: StreamerSettingsService
   ) {}
 
   async ngOnInit() {
@@ -74,8 +79,35 @@ export class ViewerDashboardComponent implements OnInit {
     });
   }
 
+  canRequest(): boolean {
+    if (this.streamerSettings) {
+      return this.streamerSettings.requestsPerUser > this.userRequests;
+    }
+    return false;
+  }
+
   refreshData() {
     this.getAllRequests();
+    this.getCounts();
+  }
+
+  getCounts() {
+    this.streamerSettingsService
+      .getAll({ user_id: this.authService.currentUser.id })
+      .subscribe((streamerSettings: StreamerSettings[]) => {
+        if (streamerSettings.length) {
+          this.streamerSettings = streamerSettings[0];
+        }
+      });
+
+    this.requestService
+      .count({
+        user_id: this.authService.currentUser.id,
+        streamer_id: this.streamerIdParam
+      })
+      .subscribe(count => {
+        this.userRequests = count;
+      });
   }
 
   async getUserFromId(id: string | number) {

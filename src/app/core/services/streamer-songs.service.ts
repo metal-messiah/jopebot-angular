@@ -5,12 +5,14 @@ import { HttpClient } from "@angular/common/http";
 import { RestService } from "./rest.service";
 import { CrudService } from "../../interfaces/crud-service";
 import { StreamerSong } from "app/models/streamer-song";
+import { tables } from "app/enums/tables";
 
 @Injectable({
   providedIn: "root"
 })
 export class StreamerSongsService extends CrudService<StreamerSong> {
-  endpoint = "/api/streamer-songs";
+  table: tables = tables.streamer_songs;
+  endpoint = `/api/${this.table}`;
 
   constructor(protected http: HttpClient, protected rest: RestService) {
     super(http, rest);

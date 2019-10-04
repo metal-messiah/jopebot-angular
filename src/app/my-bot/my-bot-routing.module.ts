@@ -17,15 +17,17 @@ const routes: Routes = [
       {
         path: "",
         component: BotComponent,
-        canActivate: [SocketGuard]
+        canActivate: [AuthGuard, SocketGuard]
       },
       {
         path: "settings",
-        component: StreamerSettingsComponent
+        component: StreamerSettingsComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: "songs",
-        component: StreamerSongsComponent
+        component: StreamerSongsComponent,
+        canActivate: [AuthGuard]
       }
     ]
   }

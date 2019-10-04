@@ -4,8 +4,11 @@ import { Entity } from "../models/entity";
 import { Observable } from "rxjs";
 import { map } from "rxjs/internal/operators";
 
+import { tables } from "../enums/tables";
+
 export abstract class CrudService<T> {
   protected abstract endpoint;
+  protected abstract table;
 
   protected constructor(
     protected http: HttpClient,
@@ -32,22 +35,16 @@ export abstract class CrudService<T> {
         headers: this.rest.getHeaders(),
         withCredentials: true
       })
-      .pipe(map(entityObj => this.createEntityFromObj(entityObj)));
+      .pipe(
+        map(entityObj => {
+          if (entityObj) return this.createEntityFromObj(entityObj);
+          else return null;
+        })
+      );
   }
 
   getAll(query?: object): Observable<T[]> {
-    let queryString = "";
-    if (query) {
-      queryString =
-        "?" +
-        Object.keys(query)
-          .map(key => {
-            return (
-              encodeURIComponent(key) + "=" + encodeURIComponent(query[key])
-            );
-          })
-          .join("&");
-    }
+    let queryString = this.buildQueryStringFromObject(query);
 
     const url = this.rest.getHost() + this.endpoint + `${queryString}`;
     return this.http
@@ -55,7 +52,12 @@ export abstract class CrudService<T> {
         headers: this.rest.getHeaders(),
         withCredentials: true
       })
-      .pipe(map(entityObj => entityObj.map(o => this.createEntityFromObj(o))));
+      .pipe(
+        map(entityObj => {
+          if (entityObj) return entityObj.map(o => this.createEntityFromObj(o));
+          else return null;
+        })
+      );
   }
 
   update(updatedEntity: T): Observable<T> {
@@ -65,7 +67,12 @@ export abstract class CrudService<T> {
         headers: this.rest.getHeaders(),
         withCredentials: true
       })
-      .pipe(map(entityObj => this.createEntityFromObj(entityObj)));
+      .pipe(
+        map(entityObj => {
+          if (entityObj) return this.createEntityFromObj(entityObj);
+          else return null;
+        })
+      );
   }
 
   delete(id: number): Observable<any> {
@@ -90,5 +97,35 @@ export abstract class CrudService<T> {
       headers: this.rest.getHeaders(),
       withCredentials: true
     });
+  }
+
+  count(query: object) {
+    let queryString = this.buildQueryStringFromObject(query);
+
+    const url =
+      this.rest.getHost() +
+      `/api/utilities/count/${this.table}` +
+      `${queryString}`;
+    console.log(url);
+    return this.http.get<number>(url, {
+      headers: this.rest.getHeaders(),
+      withCredentials: true
+    });
+  }
+
+  private buildQueryStringFromObject(query) {
+    let queryString = "";
+    if (query) {
+      queryString =
+        "?" +
+        Object.keys(query)
+          .map(key => {
+            return (
+              encodeURIComponent(key) + "=" + encodeURIComponent(query[key])
+            );
+          })
+          .join("&");
+    }
+    return queryString;
   }
 }

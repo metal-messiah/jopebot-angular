@@ -5,6 +5,7 @@ import { HttpClient } from "@angular/common/http";
 import { RestService } from "./rest.service";
 import { CrudService } from "../../interfaces/crud-service";
 import { StreamerUserPrivilege } from "app/models/streamer-user-privilege";
+import { tables } from "app/enums/tables";
 
 @Injectable({
   providedIn: "root"
@@ -12,7 +13,8 @@ import { StreamerUserPrivilege } from "app/models/streamer-user-privilege";
 export class StreamerUserPrivilegesService extends CrudService<
   StreamerUserPrivilege
 > {
-  endpoint = "/api/streamer-user-privileges";
+  table: tables = tables.streamer_user_privileges;
+  endpoint = `/api/${this.table}`;
 
   constructor(protected http: HttpClient, protected rest: RestService) {
     super(http, rest);

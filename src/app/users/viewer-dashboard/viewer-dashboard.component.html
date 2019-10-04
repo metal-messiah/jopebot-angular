@@ -126,7 +126,13 @@
     </div>
   </div>
 
-  <button (click)="newRequest()" id="new-request-button" mat-fab color="warn">
+  <button
+    [disabled]="!canRequest()"
+    (click)="newRequest()"
+    id="new-request-button"
+    mat-fab
+    color="warn"
+  >
     <i class="fas fa-plus-circle"></i>
   </button>
 

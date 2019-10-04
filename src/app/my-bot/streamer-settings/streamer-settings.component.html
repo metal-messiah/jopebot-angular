@@ -1,1 +1,123 @@
-<p>streamer-settings works!</p>
+<mat-spinner *ngIf="!form" color="accent"></mat-spinner>
+<div class="form-container" *ngIf="form">
+  <form [formGroup]="form" (submit)="onSubmit()">
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        formControlName="requestsPerUser"
+        placeholder="Requests Per User"
+      />
+      <mat-error *ngIf="!form.get('requestsPerUser').valid"
+        >Must be whole number, greater than 0</mat-error
+      >
+    </mat-form-field>
+    <button mat-fab type="submit" color="primary" [disabled]="!form.valid">
+      <i *ngIf="!saving" class="fas fa-save"></i>
+      <i *ngIf="saving" class="fas fa-spinner fa-pulse"></i>
+    </button>
+    <!-- <h4>Chat Settings</h4> -->
+    <!-- <div>
+      <mat-checkbox formControlName="allowChatRequests">
+        Allow Chat Requests
+      </mat-checkbox>
+    </div>
+    <br /> -->
+    <!-- <mat-form-field>
+      <input
+        matInput
+        type="text"
+        formControlName="customInfoMessage"
+        placeholder="Custom Info Message"
+      />
+    </mat-form-field>
+
+    <div>
+      <mat-checkbox formControlName="hideChatMessages">
+        Hide Chat Messages
+      </mat-checkbox>
+    </div>
+    <br />
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        min="0"
+        formControlName="infoMessageChats"
+        placeholder="Info Message Chat Trigger"
+      />
+    </mat-form-field>
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        min="0"
+        formControlName="infoMessageSeconds"
+        placeholder="Info Message Seconds Trigger"
+      />
+    </mat-form-field>
+
+    <h3>Bot Voice Settings</h3>
+    <mat-form-field>
+      <input
+        type="text"
+        matInput
+        formControlName="botVoiceName"
+        placeholder="Bot Voice"
+      />
+    </mat-form-field>
+
+    <div>
+      <mat-checkbox formControlName="botVoiceOnRequest">
+        Bot Voice On Request
+      </mat-checkbox>
+    </div>
+    <br />
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        min="0.5"
+        max="1"
+        formControlName="botVoicePitch"
+        placeholder="Bot Voice Pitch"
+      />
+    </mat-form-field>
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        min="0.5"
+        max="1"
+        formControlName="botVoiceRate"
+        placeholder="Bot Voice Rate"
+      />
+    </mat-form-field>
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        min="0.5"
+        max="1"
+        formControlName="botVoiceVolume"
+        placeholder="Bot Voice Volume"
+      />
+    </mat-form-field>
+
+    <h3>Request Settings</h3>
+    <div>
+      <mat-checkbox formControlName="profanityFilter">
+        Profanity Filter
+      </mat-checkbox>
+    </div>
+    <br />
+    <mat-form-field>
+      <input
+        matInput
+        type="text"
+        formControlName="requestAlias"
+        placeholder="Request Alias"
+      />
+    </mat-form-field> -->
+  </form>
+</div>

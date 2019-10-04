@@ -74,3 +74,7 @@
   transition: 100ms all;
   margin-right: 5px;
 }
+
+.mat-form-field-label {
+  color: #ffab40 !important;
+}

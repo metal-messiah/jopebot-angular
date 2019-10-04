@@ -14,6 +14,9 @@ import { Request } from "app/models/request";
 import { RequestService } from "app/core/services/request.service";
 
 import { Location } from "@angular/common";
+import { StreamerSettingsService } from "app/core/services/streamer-settings.service";
+import { StreamerSettings } from "app/models/streamer-settings";
+import { tables } from "app/enums/tables";
 
 @Component({
   selector: "app-request",
@@ -41,6 +44,9 @@ export class RequestComponent implements OnInit {
   customMessageControl: FormControl;
   linkControl: FormControl;
 
+  streamerSettings: StreamerSettings;
+  userRequests: number;
+
   fuse: Fuse<any>;
 
   constructor(
@@ -50,7 +56,7 @@ export class RequestComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private requestService: RequestService,
-    private location: Location
+    private streamerSettingsService: StreamerSettingsService
   ) {}
 
   ngOnInit() {
@@ -61,6 +67,23 @@ export class RequestComponent implements OnInit {
         this.populateForms();
       }
       this.fetchSongs();
+
+      this.streamerSettingsService
+        .getAll({ user_id: this.authService.currentUser.id })
+        .subscribe((streamerSettings: StreamerSettings[]) => {
+          if (streamerSettings.length) {
+            this.streamerSettings = streamerSettings[0];
+          }
+        });
+
+      this.requestService
+        .count({
+          user_id: this.authService.currentUser.id,
+          streamer_id: this.streamerIdParam
+        })
+        .subscribe(count => {
+          this.userRequests = count;
+        });
     });
 
     this.textControl = new FormControl("");
@@ -166,39 +189,46 @@ export class RequestComponent implements OnInit {
   }
 
   submitNewRequest() {
-    this.submitting = true;
-    const song: string = this.selectedSong
-      ? JSON.stringify(this.selectedSong)
-      : null;
-    const link: URL = this.linkControl.valid ? this.linkControl.value : null;
-    const message: string = this.customMessageControl.value
-      ? this.customMessageControl.value
-      : null;
+    if (
+      this.streamerSettings.requestsPerUser > this.userRequests &&
+      !this.requestIdParam
+    ) {
+      this.submitting = true;
+      const song: string = this.selectedSong
+        ? JSON.stringify(this.selectedSong)
+        : null;
+      const link: URL = this.linkControl.valid ? this.linkControl.value : null;
+      const message: string = this.customMessageControl.value
+        ? this.customMessageControl.value
+        : null;
 
-    this.userService
-      .getOneById(this.streamerIdParam)
-      .subscribe((user: User) => {
-        const options = {
-          id: this.requestIdParam,
-          message: message || null,
-          user: this.authService.currentUser,
-          streamer: user,
-          song: song,
-          link: link
-        };
-        const request = new Request(options);
+      this.userService
+        .getOneById(this.streamerIdParam)
+        .subscribe((user: User) => {
+          const options = {
+            id: this.requestIdParam,
+            message: message || null,
+            user: this.authService.currentUser,
+            streamer: user,
+            song: song,
+            link: link
+          };
+          const request = new Request(options);
 
-        if (request.id) {
-          this.requestService.update(request).subscribe(resp => {
-            // console.log(this.route, this.router);
-            this.router.navigate(["/users", this.streamerIdParam]);
-          });
-        } else {
-          this.requestService.create(request).subscribe(resp => {
-            // console.log(this.route, this.router);
-            this.router.navigate(["/users", this.streamerIdParam]);
-          });
-        }
-      });
+          if (request.id) {
+            this.requestService.update(request).subscribe(resp => {
+              // console.log(this.route, this.router);
+              this.router.navigate(["/users", this.streamerIdParam]);
+            });
+          } else {
+            this.requestService.create(request).subscribe(resp => {
+              // console.log(this.route, this.router);
+              this.router.navigate(["/users", this.streamerIdParam]);
+            });
+          }
+        });
+    } else {
+      console.log("TOO MANY REQUESTS!");
+    }
   }
 }

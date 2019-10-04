@@ -190,8 +190,8 @@ export class RequestComponent implements OnInit {
 
   submitNewRequest() {
     if (
-      this.streamerSettings.requestsPerUser > this.userRequests &&
-      !this.requestIdParam
+      this.streamerSettings.requestsPerUser > this.userRequests ||
+      this.requestIdParam
     ) {
       this.submitting = true;
       const song: string = this.selectedSong

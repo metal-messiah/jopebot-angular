@@ -1,6 +1,7 @@
 <mat-spinner *ngIf="!form" color="accent"></mat-spinner>
 <div class="form-container" *ngIf="form">
   <form [formGroup]="form" (submit)="onSubmit()">
+    <h3>Settings</h3>
     <mat-form-field>
       <input
         matInput

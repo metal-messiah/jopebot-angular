@@ -1,10 +1,190 @@
-<mat-spinner *ngIf="loading"></mat-spinner>
-<div *ngIf="errorMsg">{{ errorMsg }}</div>
-<div>
-  This is where the bot queues will be for the streamer, and links to reset
-  their config stuff
+<div class="inner-content">
+  <div>
+    <div class="loading-container">
+      <div>
+        <mat-spinner *ngIf="loading"></mat-spinner>
+        <div class="message-container" *ngIf="message">{{ message }}</div>
+      </div>
+    </div>
+    <div class="modules-container">
+      <div
+        id="request-queue"
+        class="module"
+        *ngIf="authService.currentUser && !loading"
+      >
+        <h3>Request Queue</h3>
+        <mat-progress-bar
+          *ngIf="fetching.requestQueue"
+          mode="indeterminate"
+        ></mat-progress-bar>
+        <div class="item-container">
+          <div
+            class="item-card"
+            *ngFor="let request of requestQueue; let i = index"
+            [matBadge]="i + 1"
+            matBadgePosition="before"
+          >
+            <div class="item-card-row">
+              <div class="item-card-title">
+                {{ getRequestMessage(request) }}
+              </div>
+              <div
+                class="item-card-logo"
+                [ngStyle]="{
+                  backgroundImage: 'url(' + request.createdBy.logo + ')'
+                }"
+                [matTooltip]="request.user.displayName"
+                matTooltipPosition="left"
+              ></div>
+            </div>
+            <div class="item-card-row">
+              <div class="item-card-date">
+                {{ request.createdAt | date: "medium" }}
+              </div>
+
+              <button
+                mat-icon-button
+                color="warn"
+                [disabled]="!request.song"
+                (click)="showSongInfo(request.song)"
+                matTooltip="Show Song Info"
+                matTooltipPosition="left"
+              >
+                <i class="fas fa-music"></i>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                [disabled]="!request.link"
+                (click)="openLink(request.link)"
+                matTooltip="Open Link"
+                matTooltipPosition="left"
+              >
+                <i class="fas fa-link"></i>
+              </button>
+              <button
+                mat-icon-button
+                color="accent"
+                (click)="play(request)"
+                matTooltip="Play Request"
+                matTooltipPosition="left"
+              >
+                <i *ngIf="playing !== request.id" class="fas fa-play"></i>
+                <i
+                  *ngIf="playing === request.id"
+                  class="fas fa-spinner fa-pulse"
+                ></i>
+              </button>
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="itemCardMenu"
+                matTooltip="More Actions"
+                matTooltipPosition="right"
+                (click)="setMenuTarget(request)"
+              >
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="played-requests"
+        class="module"
+        *ngIf="authService.currentUser && !loading"
+      >
+        <h3>Played Requests</h3>
+        <mat-progress-bar
+          *ngIf="fetching.playedRequests"
+          mode="indeterminate"
+        ></mat-progress-bar>
+        <div class="item-container">
+          <div
+            class="item-card"
+            *ngFor="let request of playedRequests; let i = index"
+            [matBadge]="playedRequests.length - i"
+            matBadgePosition="before"
+          >
+            <div class="item-card-row">
+              <div class="item-card-title">
+                {{ getRequestMessage(request) }}
+              </div>
+              <div
+                class="item-card-logo"
+                [ngStyle]="{
+                  backgroundImage: 'url(' + request.createdBy.logo + ')'
+                }"
+                [matTooltip]="request.user.displayName"
+                matTooltipPosition="left"
+              ></div>
+            </div>
+            <div class="item-card-row">
+              <div class="item-card-date">
+                {{ request.played | date: "medium" }}
+              </div>
+              <button
+                mat-icon-button
+                color="warn"
+                [disabled]="!request.song"
+                (click)="showSongInfo(request.song)"
+                matTooltip="Show Song Info"
+                matTooltipPosition="left"
+              >
+                <i class="fas fa-music"></i>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                [disabled]="!request.link"
+                (click)="openLink(request.link)"
+                matTooltip="Open Link"
+                matTooltipPosition="left"
+              >
+                <i class="fas fa-link"></i>
+              </button>
+              <button
+                mat-icon-button
+                color="accent"
+                (click)="unplay(request)"
+                matTooltip="Undo Played Request"
+                matTooltipPosition="left"
+              >
+                <i *ngIf="playing !== request.id" class="fas fa-undo"></i>
+                <i
+                  *ngIf="playing === request.id"
+                  class="fas fa-spinner fa-pulse"
+                ></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-menu #itemCardMenu="matMenu" yPosition="below" xPosition="after">
+        <button mat-menu-item (click)="deleteRequest()">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+      </mat-menu>
+    </div>
+
+    <mat-toolbar class="bottom-bar">
+      <button
+        mat-flat-button
+        (click)="scrollTo('request-queue')"
+        matTooltip="Request Queue"
+        matTooltipPosition="above"
+      >
+        <i class="fas fa-list-ol"></i>
+      </button>
+      <button
+        mat-flat-button
+        (click)="scrollTo('played-requests')"
+        matTooltip="Played Requests"
+        matTooltipPosition="above"
+      >
+        <i class="fas fa-clipboard-check"></i>
+      </button>
+    </mat-toolbar>
+  </div>
 </div>
-<hr />
-<a [routerLink]="['/bot/settings']">Settings</a>
-<hr />
-<a [routerLink]="['/bot/songs']">Songs</a>

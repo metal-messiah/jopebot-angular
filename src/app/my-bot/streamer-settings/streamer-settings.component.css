@@ -6,7 +6,7 @@ form {
   width: 100%;
   background: #777;
   padding: 10px 20px;
-  min-height: calc(100vh - 150px);
+  min-height: calc(100vh - 175px);
   border-radius: 10px;
   position: relative;
 }
@@ -26,4 +26,8 @@ mat-spinner {
 form > button {
   position: fixed;
   right: 20px;
+}
+
+.form-container {
+  margin-top: 50px;
 }

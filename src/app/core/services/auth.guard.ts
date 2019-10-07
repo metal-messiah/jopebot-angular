@@ -1,13 +1,9 @@
-import { Injectable } from "@angular/core";
-import {
-  CanActivate,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot
-} from "@angular/router";
-import { AuthService } from "./auth.service";
-import { Observable, of } from "rxjs";
-import { tap } from "rxjs/operators";
-import { User } from "app/models/user";
+import { Injectable } from '@angular/core';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { AuthService } from './auth.service';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { User } from 'app/models/user';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -29,15 +25,9 @@ export class AuthGuard implements CanActivate {
       const promise: Promise<boolean> = new Promise((resolve, reject) => {
         this.authService.fetchCurrentUserFromDB().subscribe((user: User) => {
           if (user) {
-            this.authService
-              .isAuthenticated()
-              .subscribe((authenticated: boolean) => {
-                if (!authenticated) {
-                  this.authService.signIn(state.url);
-                }
-                resolve(authenticated);
-              });
+            resolve(true);
           } else {
+            this.authService.signIn(state.url);
             resolve(false);
           }
         });

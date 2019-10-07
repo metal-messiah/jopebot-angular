@@ -1,6 +1,6 @@
 * {
   box-sizing: border-box;
-  font-family: "Audiowide", cursive;
+  font-family: 'Audiowide', cursive;
 }
 
 mat-toolbar {
@@ -22,11 +22,11 @@ mat-toolbar {
 .mat-toolbar-row.secondary {
   z-index: 0;
   height: 36px;
-  background: #1f1f1f;
+  background: #555;
   color: #ffab40;
   display: flex;
   align-items: center;
-  background-image: url("assets/images/background-texture.png");
+  background-image: url('assets/images/background-texture.png');
   background-blend-mode: color-burn;
   box-shadow: black 0px 0px 5px;
 }

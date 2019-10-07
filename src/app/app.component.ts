@@ -1,46 +1,45 @@
-import { Component, OnInit } from "@angular/core";
-import { AuthService } from "./core/services/auth.service";
-import { Router } from "@angular/router";
-import { Location } from "@angular/common";
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from './core/services/auth.service';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 
-import { trigger, transition, useAnimation } from "@angular/animations";
-import { flipInY, fadeIn, rubberBand, slideInUp } from "ng-animate";
+import { trigger, transition, useAnimation } from '@angular/animations';
+import { flipInY, fadeIn, rubberBand, slideInUp } from 'ng-animate';
 
 @Component({
-  selector: "app-root",
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
   animations: [
-    trigger("slideInUp", [transition("* => *", useAnimation(slideInUp))]),
-    trigger("flipInY", [transition("* => *", useAnimation(flipInY))]),
-    trigger("fadeIn", [transition("* => *", useAnimation(fadeIn))])
+    trigger('slideInUp', [transition('* => *', useAnimation(slideInUp))]),
+    trigger('flipInY', [transition('* => *', useAnimation(flipInY))]),
+    trigger('fadeIn', [transition('* => *', useAnimation(fadeIn))])
   ]
 })
 export class AppComponent implements OnInit {
   checkedLogin = false;
+  isAuthenticated;
 
-  constructor(
-    private _location: Location,
-    private auth: AuthService,
-    private router: Router
-  ) {}
+  constructor(private _location: Location, private auth: AuthService, private router: Router) {}
 
   async ngOnInit() {
-    this.auth.isAuthenticated();
+    this.isAuthenticated = await this.auth.isAuthenticated().toPromise();
     this.checkedLogin = true;
   }
 
   goHome() {
-    this.router.navigate([""]);
+    this.router.navigate(['']);
   }
 
   isHomePage() {
-    return this._location.isCurrentPathEqualTo("");
+    return this._location.isCurrentPathEqualTo('');
   }
 
   logout() {
-    if (confirm("Are you sure you want to log out?")) {
-      this.auth.logout();
+    if (confirm('Are you sure you want to log out?')) {
+      this.auth.logout().subscribe(() => {
+        this.router.navigate(['/home']);
+      });
     }
   }
 
@@ -54,22 +53,22 @@ export class AppComponent implements OnInit {
 
   getAuthText(): string {
     if (!this.auth.currentUser && this.checkedLogin) {
-      return "Twitch.tv";
+      return 'Twitch.tv';
     }
     if (!this.checkedLogin) {
-      return "Connecting to Twitch.tv...";
+      return 'Connecting to Twitch.tv...';
     }
     return `${this.auth.currentUser.username}`;
   }
 
   getAuthIcon(): string[] {
     if (!this.auth.currentUser && this.checkedLogin) {
-      return ["fab", "twitch"];
+      return ['fab', 'twitch'];
     }
     if (!this.checkedLogin) {
-      return ["fas", "spinner"];
+      return ['fas', 'spinner'];
     }
-    return ["fas", "user"];
+    return ['fas', 'user'];
   }
 
   getAuthIconPulse(): boolean {
@@ -78,10 +77,10 @@ export class AppComponent implements OnInit {
 
   getActionText(): string {
     if (this.checkedLogin && !this.auth.currentUser) {
-      return "Sign In";
+      return 'Sign In';
     }
     if (this.checkedLogin && this.auth.currentUser) {
-      return "Log Out";
+      return 'Log Out';
     }
   }
 

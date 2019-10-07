@@ -1,25 +1,27 @@
-import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { UserService } from "app/core/services/user.service";
-import { UserValidator } from "app/core/extenders/UserValidator";
-import { AuthService } from "app/core/services/auth.service";
-import { StreamerSettings } from "app/models/streamer-settings";
-import { StreamerSettingsService } from "app/core/services/streamer-settings.service";
-import { SocketService } from "app/core/services/socket.service";
-import { RequestService } from "app/core/services/request.service";
-import { Request } from "app/models/request";
-import { DisplayDialogComponent } from "app/shared/display-dialog/display-dialog.component";
-import { MatDialog } from "@angular/material";
-import { ConfirmDialogComponent } from "app/shared/confirm-dialog/confirm-dialog.component";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { UserService } from 'app/core/services/user.service';
+import { UserValidator } from 'app/core/extenders/UserValidator';
+import { AuthService } from 'app/core/services/auth.service';
+import { StreamerSettings } from 'app/models/streamer-settings';
+import { StreamerSettingsService } from 'app/core/services/streamer-settings.service';
+import { SocketService } from 'app/core/services/socket.service';
+import { RequestService } from 'app/core/services/request.service';
+import { Request } from 'app/models/request';
+import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog.component';
+import { MatDialog } from '@angular/material';
+import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
+import { StreamerPollsService } from 'app/core/services/streamer-polls.service';
+import { StreamerPollResult } from 'app/models/streamer-poll-result';
 
 @Component({
-  selector: "app-bot",
-  templateUrl: "./bot.component.html",
-  styleUrls: ["./bot.component.css"]
+  selector: 'app-bot',
+  templateUrl: './bot.component.html',
+  styleUrls: ['./bot.component.css']
 })
 export class BotComponent implements OnInit {
   loading = true;
-  message = "";
+  message = '';
   streamerSettings: StreamerSettings;
   fetching = { requestQueue: false, playedRequests: false };
 
@@ -41,11 +43,12 @@ export class BotComponent implements OnInit {
     private route: ActivatedRoute,
     private socketService: SocketService,
     private requestService: RequestService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private streamerPollsService: StreamerPollsService
   ) {}
 
   ngOnInit() {
-    this.message = "Finding Streamer Settings...";
+    this.message = 'Finding Streamer Settings...';
 
     this.streamerSettingsService
       .getAll({ user_id: this.authService.currentUser.id })
@@ -54,19 +57,17 @@ export class BotComponent implements OnInit {
           this.streamerSettings = streamerSettings[0];
           this.refreshData();
         } else {
-          this.message = "Initializing Settings For New Streamer!";
+          this.message = 'Initializing Settings For New Streamer!';
           const streamerSettings = new StreamerSettings({
             user: this.authService.currentUser
           });
-          this.streamerSettingsService
-            .create(streamerSettings)
-            .subscribe((ss: StreamerSettings) => {
-              this.message = "Initialized With Default Settings!";
-              setTimeout(() => {
-                this.message = "Fetching Request Lists";
-                this.refreshData();
-              }, 1000);
-            });
+          this.streamerSettingsService.create(streamerSettings).subscribe((ss: StreamerSettings) => {
+            this.message = 'Initialized With Default Settings!';
+            setTimeout(() => {
+              this.message = 'Fetching Request Lists';
+              this.refreshData();
+            }, 1000);
+          });
         }
       });
 
@@ -78,19 +79,17 @@ export class BotComponent implements OnInit {
 
   async getAllRequests() {
     this.loading = false;
-    this.message = "";
+    this.message = '';
     this.fetching.requestQueue = true;
     this.fetching.playedRequests = true;
 
-    const allRequests = await this.requestService
-      .getAll({ streamer_id: this.authService.currentUser.id })
-      .toPromise();
+    const allRequests = await this.requestService.getAll({ streamer_id: this.authService.currentUser.id }).toPromise();
 
     this.requestQueue = allRequests.filter(r => !r.played);
     this.playedRequests = allRequests.filter(r => r.played);
 
-    this.sortByDateField(this.requestQueue, "createdAt", true);
-    this.sortByDateField(this.playedRequests, "played", false);
+    this.sortByDateField(this.requestQueue, 'createdAt', true);
+    this.sortByDateField(this.playedRequests, 'played', false);
 
     this.fetching.requestQueue = false;
     this.fetching.playedRequests = false;
@@ -98,6 +97,13 @@ export class BotComponent implements OnInit {
 
   refreshData() {
     this.getAllRequests();
+    this.getPollResults();
+  }
+
+  getPollResults() {
+    this.streamerPollsService.getPollResults(1).subscribe((results: StreamerPollResult) => {
+      console.log(results);
+    });
   }
 
   sortByDateField(list: any[], property: string, asc: boolean) {
@@ -113,19 +119,19 @@ export class BotComponent implements OnInit {
   openLink(link: string) {
     this.dialog
       .open(ConfirmDialogComponent, {
-        data: { title: "Caution! SpOOpy!", question: this.downloadWarning }
+        data: { title: 'Caution! SpOOpy!', question: this.downloadWarning }
       })
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          window.open(link, "_blank");
+          window.open(link, '_blank');
         }
       });
   }
 
   scrollTo(elemId: string) {
     const elem = document.getElementById(elemId);
-    elem.scrollIntoView({ behavior: "smooth" });
+    elem.scrollIntoView({ behavior: 'smooth' });
   }
 
   showSongInfo(song: string) {
@@ -133,9 +139,9 @@ export class BotComponent implements OnInit {
       const json = JSON.parse(song);
       const content = Object.keys(json)
         .map(key => `${key}: ${json[key]}`)
-        .join("\n");
+        .join('\n');
       this.dialog
-        .open(DisplayDialogComponent, { data: { title: "Info", content } })
+        .open(DisplayDialogComponent, { data: { title: 'Info', content } })
         .afterClosed()
         .subscribe(result => {
           if (result) {
@@ -168,7 +174,7 @@ export class BotComponent implements OnInit {
   deleteRequest() {
     const targetRequest: Request = this.menuTarget;
     this.requestService.delete(targetRequest.id).subscribe(() => {
-      console.log("Deleted Request!");
+      console.log('Deleted Request!');
       this.refreshData();
     });
   }

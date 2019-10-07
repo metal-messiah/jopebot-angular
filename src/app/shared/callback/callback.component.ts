@@ -1,13 +1,13 @@
-import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { AuthService } from "app/core/services/auth.service";
-import { UserService } from "app/core/services/user.service";
-import { User } from "app/models/user";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from 'app/core/services/auth.service';
+import { UserService } from 'app/core/services/user.service';
+import { User } from 'app/models/user';
 
 @Component({
-  selector: "app-callback",
-  templateUrl: "./callback.component.html",
-  styleUrls: ["./callback.component.css"]
+  selector: 'app-callback',
+  templateUrl: './callback.component.html',
+  styleUrls: ['./callback.component.css']
 })
 export class CallbackComponent implements OnInit {
   constructor(
@@ -19,14 +19,16 @@ export class CallbackComponent implements OnInit {
 
   async ngOnInit() {
     const params = this.route.snapshot.queryParamMap;
-    const redirect: string = params.get("redirect");
+    const redirect: string = params.get('redirect');
     const user = await this.authService.fetchCurrentUserFromDB().toPromise();
     if (user) {
       this.authService.currentUser = new User(user);
 
       this.router.navigate([redirect]);
     } else {
-      this.router.navigate(["/"]);
+      console.log(this.router, this.route);
+      this.router.navigate(['../'], { relativeTo: this.route });
+      // window.open('/', '_self');
     }
   }
 }

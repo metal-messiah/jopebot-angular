@@ -1,31 +1,31 @@
-import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { AuthService } from "app/core/services/auth.service";
-import { User } from "../../models/user";
-import { UserService } from "app/core/services/user.service";
-import { StreamerSongsService } from "app/core/services/streamer-songs.service";
-import { StreamerUserPrivilegesService } from "app/core/services/streamer-user-privileges.service";
-import { StreamerSettingsService } from "app/core/services/streamer-settings.service";
-import { RequestService } from "app/core/services/request.service";
-import { Request } from "../../models/request";
-import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { FormBuilder } from "@angular/forms";
-import { HttpClient } from "@angular/common/http";
-import eh from "../../interfaces/error-handler";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from 'app/core/services/auth.service';
+import { User } from '../../models/user';
+import { UserService } from 'app/core/services/user.service';
+import { StreamerSongsService } from 'app/core/services/streamer-songs.service';
+import { StreamerUserPrivilegesService } from 'app/core/services/streamer-user-privileges.service';
+import { StreamerSettingsService } from 'app/core/services/streamer-settings.service';
+import { RequestService } from 'app/core/services/request.service';
+import { Request } from '../../models/request';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import eh from '../../interfaces/error-handler';
 
-import { trigger, transition, useAnimation } from "@angular/animations";
-import { zoomIn } from "ng-animate";
-import { StreamerSong } from "app/models/streamer-song";
-import { MatDialog } from "@angular/material";
-import { ConfirmDialogComponent } from "app/shared/confirm-dialog/confirm-dialog.component";
-import { DisplayDialogComponent } from "app/shared/display-dialog/display-dialog.component";
-import { SocketService } from "app/core/services/socket.service";
-import { StreamerSettings } from "app/models/streamer-settings";
+import { trigger, transition, useAnimation } from '@angular/animations';
+import { zoomIn } from 'ng-animate';
+import { StreamerSong } from 'app/models/streamer-song';
+import { MatDialog } from '@angular/material';
+import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
+import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog.component';
+import { SocketService } from 'app/core/services/socket.service';
+import { StreamerSettings } from 'app/models/streamer-settings';
 @Component({
-  selector: "app-viewer-dashboard",
-  templateUrl: "./viewer-dashboard.component.html",
-  styleUrls: ["./viewer-dashboard.component.css"],
-  animations: [trigger("zoomIn", [transition("* => *", useAnimation(zoomIn))])]
+  selector: 'app-viewer-dashboard',
+  templateUrl: './viewer-dashboard.component.html',
+  styleUrls: ['./viewer-dashboard.component.css'],
+  animations: [trigger('zoomIn', [transition('* => *', useAnimation(zoomIn))])]
 })
 export class ViewerDashboardComponent implements OnInit {
   streamerIdParam: string;
@@ -44,7 +44,7 @@ export class ViewerDashboardComponent implements OnInit {
   playedRequests: Request[] = [];
   songs: StreamerSong;
 
-  streamerSettings: StreamerSettings;
+  streamerSettings: StreamerSettings = null;
   userRequests: number = 0;
 
   downloadWarning = `These links could point anywhere, are provided by random people on the internet, and are in no way affiliated with JopeBot.
@@ -66,7 +66,7 @@ export class ViewerDashboardComponent implements OnInit {
   async ngOnInit() {
     // Subscribed
     this.route.paramMap.subscribe(async params => {
-      this.streamerIdParam = params.get("userid");
+      this.streamerIdParam = params.get('userid');
       await this.getUserFromId(this.streamerIdParam);
       if (this.userFromId) {
         this.refreshData();
@@ -92,6 +92,7 @@ export class ViewerDashboardComponent implements OnInit {
   }
 
   getCounts() {
+    console.log('get counts');
     this.streamerSettingsService
       .getAll({ user_id: this.authService.currentUser.id })
       .subscribe((streamerSettings: StreamerSettings[]) => {
@@ -103,21 +104,19 @@ export class ViewerDashboardComponent implements OnInit {
     this.requestService
       .count({
         user_id: this.authService.currentUser.id,
-        streamer_id: this.streamerIdParam
+        streamer_id: this.streamerIdParam,
+        'played is': null
       })
       .subscribe(count => {
         this.userRequests = count;
+        console.log(count);
       });
   }
 
   async getUserFromId(id: string | number) {
-    let [error, user] = await eh(
-      this.userService.getOneById(this.streamerIdParam).toPromise()
-    );
+    let [error, user] = await eh(this.userService.getOneById(this.streamerIdParam).toPromise());
     if (error) {
-      this.setErrorMsg(
-        `${this.streamerIdParam} does not reference a valid user...`
-      );
+      this.setErrorMsg(`${this.streamerIdParam} does not reference a valid user...`);
     } else {
       this.userFromId = user;
     }
@@ -141,15 +140,13 @@ export class ViewerDashboardComponent implements OnInit {
     this.fetching.requestQueue = true;
     this.fetching.playedRequests = true;
 
-    const allRequests = await this.requestService
-      .getAll({ streamer_id: this.streamerIdParam })
-      .toPromise();
+    const allRequests = await this.requestService.getAll({ streamer_id: this.streamerIdParam }).toPromise();
 
     this.requestQueue = allRequests.filter(r => !r.played);
     this.playedRequests = allRequests.filter(r => r.played);
 
-    this.sortByDateField(this.requestQueue, "createdAt", true);
-    this.sortByDateField(this.playedRequests, "played", false);
+    this.sortByDateField(this.requestQueue, 'createdAt', true);
+    this.sortByDateField(this.playedRequests, 'played', false);
 
     this.fetching.requestQueue = false;
     this.fetching.playedRequests = false;
@@ -162,23 +159,23 @@ export class ViewerDashboardComponent implements OnInit {
   openLink(link: string) {
     this.dialog
       .open(ConfirmDialogComponent, {
-        data: { title: "Caution! SpOOpy!", question: this.downloadWarning }
+        data: { title: 'Caution! SpOOpy!', question: this.downloadWarning }
       })
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          window.open(link, "_blank");
+          window.open(link, '_blank');
         }
       });
   }
 
   scrollTo(elemId: string) {
     const elem = document.getElementById(elemId);
-    elem.scrollIntoView({ behavior: "smooth" });
+    elem.scrollIntoView({ behavior: 'smooth' });
   }
 
   newRequest() {
-    this.router.navigate(["request"], { relativeTo: this.route });
+    this.router.navigate(['request'], { relativeTo: this.route });
   }
 
   showSongInfo(song: string) {
@@ -186,9 +183,9 @@ export class ViewerDashboardComponent implements OnInit {
       const json = JSON.parse(song);
       const content = Object.keys(json)
         .map(key => `${key}: ${json[key]}`)
-        .join("\n");
+        .join('\n');
       this.dialog
-        .open(DisplayDialogComponent, { data: { title: "Info", content } })
+        .open(DisplayDialogComponent, { data: { title: 'Info', content } })
         .afterClosed()
         .subscribe(result => {
           if (result) {
@@ -220,7 +217,7 @@ export class ViewerDashboardComponent implements OnInit {
 
   editRequest() {
     const targetRequest: Request = this.menuTarget;
-    this.router.navigate(["request", targetRequest.id], {
+    this.router.navigate(['request', targetRequest.id], {
       relativeTo: this.route
     });
   }
@@ -228,7 +225,7 @@ export class ViewerDashboardComponent implements OnInit {
   deleteRequest() {
     const targetRequest: Request = this.menuTarget;
     this.requestService.delete(targetRequest.id).subscribe(() => {
-      console.log("Deleted Request!");
+      console.log('Deleted Request!');
       this.refreshData();
     });
   }

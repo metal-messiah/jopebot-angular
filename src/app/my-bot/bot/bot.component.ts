@@ -11,8 +11,6 @@ import { Request } from 'app/models/request';
 import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog.component';
 import { MatDialog } from '@angular/material';
 import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
-import { StreamerPollsService } from 'app/core/services/streamer-polls.service';
-import { StreamerPollResult } from 'app/models/streamer-poll-result';
 
 @Component({
   selector: 'app-bot',
@@ -43,8 +41,7 @@ export class BotComponent implements OnInit {
     private route: ActivatedRoute,
     private socketService: SocketService,
     private requestService: RequestService,
-    private dialog: MatDialog,
-    private streamerPollsService: StreamerPollsService
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -97,13 +94,6 @@ export class BotComponent implements OnInit {
 
   refreshData() {
     this.getAllRequests();
-    this.getPollResults();
-  }
-
-  getPollResults() {
-    this.streamerPollsService.getPollResults(1).subscribe((results: StreamerPollResult) => {
-      console.log(results);
-    });
   }
 
   sortByDateField(list: any[], property: string, asc: boolean) {

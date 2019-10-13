@@ -1,33 +1,39 @@
-import { NgModule } from "@angular/core";
-import { RouterModule, Routes } from "@angular/router";
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
-import { AuthGuard } from "../core/services/auth.guard";
-import { MyBotComponent } from "./my-bot.component";
-import { StreamerSettingsComponent } from "./streamer-settings/streamer-settings.component";
-import { StreamerSongsComponent } from "./streamer-songs/streamer-songs.component";
-import { BotComponent } from "./bot/bot.component";
-import { SocketGuard } from "app/core/services/socket.guard";
+import { AuthGuard } from '../core/services/auth.guard';
+import { MyBotComponent } from './my-bot.component';
+import { StreamerSettingsComponent } from './streamer-settings/streamer-settings.component';
+import { StreamerSongsComponent } from './streamer-songs/streamer-songs.component';
+import { BotComponent } from './bot/bot.component';
+import { SocketGuard } from 'app/core/services/socket.guard';
+import { StreamerPollsComponent } from './streamer-polls/streamer-polls.component';
 
 const routes: Routes = [
   {
-    path: "bot",
+    path: 'bot',
     component: MyBotComponent,
     canActivate: [AuthGuard, SocketGuard],
     children: [
       {
-        path: "",
+        path: '',
         component: BotComponent,
         canActivate: [AuthGuard, SocketGuard]
       },
       {
-        path: "settings",
+        path: 'settings',
         component: StreamerSettingsComponent,
         canActivate: [AuthGuard]
       },
       {
-        path: "songs",
+        path: 'songs',
         component: StreamerSongsComponent,
         canActivate: [AuthGuard]
+      },
+      {
+        path: 'polls',
+        component: StreamerPollsComponent,
+        canActivate: [AuthGuard, SocketGuard]
       }
     ]
   }

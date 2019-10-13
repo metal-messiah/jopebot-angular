@@ -1,11 +1,12 @@
 import { Entity } from './entity';
 import { User } from './user';
-import { StreamerPoll } from './streamer-poll';
+import { StreamerPollVote } from './streamer-poll-vote';
+import { Request } from './request';
 
 export class StreamerPollRequest implements Entity {
   id?: number;
   request?: Request;
-  streamerPoll?: StreamerPoll;
+  votes: StreamerPollVote[];
   createdAt?: Date;
   createdBy?: User;
   updatedAt?: Date;
@@ -19,8 +20,8 @@ export class StreamerPollRequest implements Entity {
     if (obj.request) {
       this.request = new Request(obj.request);
     }
-    if (obj.streamerPoll) {
-      this.streamerPoll = new StreamerPoll(obj.streamerPoll);
+    if (obj.votes && obj.votes.length) {
+      this.votes = obj.votes.map(vote => new StreamerPollVote(vote));
     }
     if (obj.createdAt) {
       this.createdAt = new Date(obj.createdAt);

@@ -1,11 +1,6 @@
 <mat-toolbar class="header-bar" color="primary">
   <mat-toolbar-row class="secondary" [@slideInUp]="slideInUp">
-    <button
-      mat-button
-      routerLink="./"
-      routerLinkActive="mat-warn"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
+    <button mat-button routerLink="./" routerLinkActive="mat-warn" [routerLinkActiveOptions]="{ exact: true }">
       Dashboard
     </button>
     <button mat-button routerLink="./settings" routerLinkActive="mat-warn">
@@ -14,6 +9,10 @@
     <button mat-button routerLink="./songs" routerLinkActive="mat-warn">
       Songs
     </button>
+    <button mat-button routerLink="./polls" routerLinkActive="mat-warn">
+      Polls
+    </button>
   </mat-toolbar-row>
 </mat-toolbar>
+<br />
 <router-outlet></router-outlet>

@@ -1,5 +1,6 @@
 import { Entity } from './entity';
 import { User } from './user';
+import { StreamerPollRequest } from './streamer-poll-request';
 
 export class StreamerPoll implements Entity {
   id?: number;
@@ -8,6 +9,7 @@ export class StreamerPoll implements Entity {
   updatedAt?: Date;
   user?: User;
   isOpen?: boolean;
+  requests?: StreamerPollRequest[];
 
   constructor(obj: StreamerPoll) {
     Object.assign(this, obj);
@@ -23,6 +25,9 @@ export class StreamerPoll implements Entity {
     }
     if (obj.updatedAt) {
       this.updatedAt = new Date(obj.updatedAt);
+    }
+    if (obj.requests && obj.requests.length) {
+      this.requests = obj.requests.map(request => new StreamerPollRequest(request));
     }
   }
 }

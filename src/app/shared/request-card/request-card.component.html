@@ -1,0 +1,90 @@
+<div [id]="getId()" class="module" *ngIf="authService.currentUser">
+  <h3>{{ type }}</h3>
+  <mat-progress-bar *ngIf="botService.fetching.playedRequests" mode="indeterminate"></mat-progress-bar>
+  <div class="item-container">
+    <div
+      class="item-card"
+      *ngFor="let request of requests; let i = index"
+      [matBadge]="requests.length - i"
+      matBadgePosition="before"
+    >
+      <div class="item-card-row">
+        <div class="item-card-title">
+          {{ botService.getRequestMessage(request) }}
+        </div>
+        <div
+          class="item-card-logo"
+          [ngStyle]="{
+            backgroundImage: 'url(' + request.user.logo + ')'
+          }"
+          [matTooltip]="request.user.displayName"
+          matTooltipPosition="left"
+        ></div>
+      </div>
+      <div class="item-card-row">
+        <div class="item-card-date">
+          {{ getDate(request) | date: 'short' }}
+        </div>
+        <button
+          mat-icon-button
+          color="warn"
+          [disabled]="!request.song"
+          (click)="botService.showSongInfo(request.song)"
+          matTooltip="Show Song Info"
+          matTooltipPosition="left"
+        >
+          <i class="fas fa-music"></i>
+        </button>
+        <button
+          mat-icon-button
+          color="warn"
+          [disabled]="!request.link"
+          (click)="botService.openLink(request.link)"
+          matTooltip="Open Link"
+          matTooltipPosition="left"
+        >
+          <i class="fas fa-link"></i>
+        </button>
+        <button
+          mat-icon-button
+          color="accent"
+          (click)="botService.play(request)"
+          matTooltip="Play Request"
+          matTooltipPosition="left"
+          *ngIf="canPlay()"
+        >
+          <i *ngIf="botService.playing !== request.id" class="fas fa-play"></i>
+          <i *ngIf="botService.playing === request.id" class="fas fa-spinner fa-pulse"></i>
+        </button>
+        <button
+          mat-icon-button
+          color="accent"
+          (click)="botService.unplay(request)"
+          matTooltip="Undo Played Request"
+          matTooltipPosition="left"
+          *ngIf="canUndo()"
+        >
+          <i *ngIf="playing !== request.id" class="fas fa-undo"></i>
+          <i *ngIf="playing === request.id" class="fas fa-spinner fa-pulse"></i>
+        </button>
+
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="itemCardMenu"
+          matTooltip="More Actions"
+          matTooltipPosition="right"
+          (click)="setMenuTarget(request)"
+          [disabled]="shouldDisableMenu(request)"
+        >
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<mat-menu #itemCardMenu="matMenu" yPosition="below" xPosition="after">
+  <button mat-menu-item *ngIf="canEdit()" (click)="editRequest()"><i class="fas fa-edit"></i> Edit</button>
+  <button mat-menu-item *ngIf="canDelete()" (click)="botService.deleteRequest()">
+    <i class="fas fa-trash-alt"></i> Delete
+  </button>
+</mat-menu>

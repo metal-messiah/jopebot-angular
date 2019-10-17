@@ -21,6 +21,9 @@ import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog
 import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog.component';
 import { SocketService } from 'app/core/services/socket.service';
 import { StreamerSettings } from 'app/models/streamer-settings';
+import { BotService } from 'app/core/services/bot.service';
+import { RequestCardType } from '../../enums/request-card-type';
+
 @Component({
   selector: 'app-viewer-dashboard',
   templateUrl: './viewer-dashboard.component.html',
@@ -28,6 +31,8 @@ import { StreamerSettings } from 'app/models/streamer-settings';
   animations: [trigger('zoomIn', [transition('* => *', useAnimation(zoomIn))])]
 })
 export class ViewerDashboardComponent implements OnInit {
+  requestCardTypes = RequestCardType;
+
   streamerIdParam: string;
   userFromId: User;
   errorMsg: string;
@@ -45,11 +50,7 @@ export class ViewerDashboardComponent implements OnInit {
   songs: StreamerSong;
 
   streamerSettings: StreamerSettings = null;
-  userRequests: number = 0;
-
-  downloadWarning = `These links could point anywhere, are provided by random people on the internet, and are in no way affiliated with JopeBot.
-  
-  Do You Wish To Continue?`;
+  userRequests = 0;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -60,7 +61,8 @@ export class ViewerDashboardComponent implements OnInit {
     private streamerSongsService: StreamerSongsService,
     private dialog: MatDialog,
     private socketService: SocketService,
-    private streamerSettingsService: StreamerSettingsService
+    private streamerSettingsService: StreamerSettingsService,
+    private botService: BotService
   ) {}
 
   async ngOnInit() {
@@ -69,37 +71,30 @@ export class ViewerDashboardComponent implements OnInit {
       this.streamerIdParam = params.get('userid');
       await this.getUserFromId(this.streamerIdParam);
       if (this.userFromId) {
+        this.botService.use(this.userFromId);
         this.refreshData();
       }
     });
 
     // subscribe to socket refresh!
-    this.socketService.refreshDatasets$.subscribe(() => {
-      this.refreshData();
-    });
+    // this.socketService.refreshDatasets$.subscribe(() => {
+    //   this.refreshData();
+    // });
   }
 
   canRequest(): boolean {
-    if (this.streamerSettings) {
-      return this.streamerSettings.requestsPerUser > this.userRequests;
+    if (this.botService.streamerSettings) {
+      return this.botService.streamerSettings.requestsPerUser > this.userRequests;
     }
     return false;
   }
 
   refreshData() {
-    this.getAllRequests();
     this.getCounts();
   }
 
   getCounts() {
     console.log('get counts');
-    this.streamerSettingsService
-      .getAll({ user_id: this.authService.currentUser.id })
-      .subscribe((streamerSettings: StreamerSettings[]) => {
-        if (streamerSettings.length) {
-          this.streamerSettings = streamerSettings[0];
-        }
-      });
 
     this.requestService
       .count({
@@ -114,7 +109,7 @@ export class ViewerDashboardComponent implements OnInit {
   }
 
   async getUserFromId(id: string | number) {
-    let [error, user] = await eh(this.userService.getOneById(this.streamerIdParam).toPromise());
+    const [error, user] = await eh(this.userService.getOneById(this.streamerIdParam).toPromise());
     if (error) {
       this.setErrorMsg(`${this.streamerIdParam} does not reference a valid user...`);
     } else {
@@ -126,47 +121,8 @@ export class ViewerDashboardComponent implements OnInit {
     this.errorMsg = msg;
   }
 
-  sortByDateField(list: any[], property: string, asc: boolean) {
-    list.sort((a, b) => {
-      if (asc) {
-        return Number(new Date(a[property])) - Number(new Date(b[property]));
-      } else {
-        return Number(new Date(b[property])) - Number(new Date(a[property]));
-      }
-    });
-  }
-
-  async getAllRequests() {
-    this.fetching.requestQueue = true;
-    this.fetching.playedRequests = true;
-
-    const allRequests = await this.requestService.getAll({ streamer_id: this.streamerIdParam }).toPromise();
-
-    this.requestQueue = allRequests.filter(r => !r.played);
-    this.playedRequests = allRequests.filter(r => r.played);
-
-    this.sortByDateField(this.requestQueue, 'createdAt', true);
-    this.sortByDateField(this.playedRequests, 'played', false);
-
-    this.fetching.requestQueue = false;
-    this.fetching.playedRequests = false;
-  }
-
   shouldDisableMenu(request: Request) {
     return request.createdBy.id !== this.authService.currentUser.id;
-  }
-
-  openLink(link: string) {
-    this.dialog
-      .open(ConfirmDialogComponent, {
-        data: { title: 'Caution! SpOOpy!', question: this.downloadWarning }
-      })
-      .afterClosed()
-      .subscribe(result => {
-        if (result) {
-          window.open(link, '_blank');
-        }
-      });
   }
 
   scrollTo(elemId: string) {
@@ -178,55 +134,7 @@ export class ViewerDashboardComponent implements OnInit {
     this.router.navigate(['request'], { relativeTo: this.route });
   }
 
-  showSongInfo(song: string) {
-    if (song) {
-      const json = JSON.parse(song);
-      const content = Object.keys(json)
-        .map(key => `${key}: ${json[key]}`)
-        .join('\n');
-      this.dialog
-        .open(DisplayDialogComponent, { data: { title: 'Info', content } })
-        .afterClosed()
-        .subscribe(result => {
-          if (result) {
-          }
-        });
-    }
-  }
-
-  getRequestMessage(request: Request) {
-    if (request.message) return request.message;
-
-    if (request.song) {
-      const json = JSON.parse(request.song);
-      if (json.Name) return json.Name;
-      if (json.name) return json.name;
-      if (json.songName) return json.songName;
-
-      return json[Object.keys(json)[0]];
-    }
-
-    if (request.link) {
-      return request.link;
-    }
-  }
-
   setMenuTarget(request: Request) {
-    this.menuTarget = request;
-  }
-
-  editRequest() {
-    const targetRequest: Request = this.menuTarget;
-    this.router.navigate(['request', targetRequest.id], {
-      relativeTo: this.route
-    });
-  }
-
-  deleteRequest() {
-    const targetRequest: Request = this.menuTarget;
-    this.requestService.delete(targetRequest.id).subscribe(() => {
-      console.log('Deleted Request!');
-      this.refreshData();
-    });
+    this.botService.menuTarget = request;
   }
 }

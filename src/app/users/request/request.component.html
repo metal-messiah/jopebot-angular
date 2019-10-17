@@ -15,18 +15,8 @@
     </mat-expansion-panel-header>
 
     <div class="input-container">
-      <mat-form-field
-        class="text-form"
-        color="accent"
-        *ngIf="textControl && fieldsControl"
-        style="width: 100%;"
-      >
-        <input
-          matInput
-          type="text"
-          placeholder="Custom Message"
-          [formControl]="customMessageControl"
-        />
+      <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl" style="width: 100%;">
+        <input matInput type="text" placeholder="Custom Message" [formControl]="customMessageControl" />
       </mat-form-field>
     </div>
   </mat-expansion-panel>
@@ -42,39 +32,17 @@
     </mat-expansion-panel-header>
 
     <div class="input-container">
-      <mat-form-field
-        class="text-form"
-        color="accent"
-        *ngIf="textControl && fieldsControl"
-      >
+      <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl">
         <input matInput placeholder="Search" [formControl]="textControl" />
-        <mat-hint *ngIf="display.length"
-          >{{ display.length | number }} Matching Records</mat-hint
-        >
+        <mat-hint *ngIf="display.length">{{ display.length | number }} Matching Records</mat-hint>
       </mat-form-field>
 
       <mat-form-field class="fields-form" color="accent" *ngIf="fieldsControl">
-        <mat-select
-          (blur)="onBlur()"
-          (focus)="onFocus()"
-          [formControl]="fieldsControl"
-          multiple
-        >
+        <mat-select (blur)="onBlur()" (focus)="onFocus()" [formControl]="fieldsControl" multiple>
           <mat-select-trigger>
-            {{
-              "Showing " +
-                fieldsControl.value.length +
-                "/" +
-                dataFields.length +
-                " Fields"
-            }}
+            {{ 'Showing ' + fieldsControl.value.length + '/' + dataFields.length + ' Fields' }}
           </mat-select-trigger>
-          <mat-option
-            *ngFor="let field of dataFields"
-            [value]="field"
-            color="accent"
-            checked
-          >
+          <mat-option *ngFor="let field of dataFields" [value]="field" color="accent" checked>
             {{ field }}
           </mat-option>
         </mat-select>
@@ -82,10 +50,7 @@
     </div>
 
     <div class="fields" *ngIf="fieldsControl && !selectIsOpen">
-      <div
-        *ngFor="let field of fieldsControl.value"
-        [ngStyle]="{ maxWidth: getRowWidth() }"
-      >
+      <div *ngFor="let field of fieldsControl.value" [ngStyle]="{ maxWidth: getRowWidth() }">
         {{ field }}
       </div>
     </div>
@@ -100,10 +65,7 @@
         *cdkVirtualFor="let song of display; let i = index"
         (click)="onSongClick(song)"
       >
-        <div
-          *ngFor="let field of fieldsControl.value"
-          [ngStyle]="{ maxWidth: getRowWidth() }"
-        >
+        <div *ngFor="let field of fieldsControl.value" [ngStyle]="{ maxWidth: getRowWidth() }">
           {{ song[field] }}
         </div>
       </div>
@@ -121,18 +83,8 @@
     </mat-expansion-panel-header>
 
     <div class="input-container">
-      <mat-form-field
-        class="text-form"
-        color="accent"
-        *ngIf="textControl && fieldsControl"
-        style="width: 100%;"
-      >
-        <input
-          matInput
-          type="text"
-          placeholder="External Link"
-          [formControl]="linkControl"
-        />
+      <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl" style="width: 100%;">
+        <input matInput type="text" placeholder="External Link" [formControl]="linkControl" />
         <mat-error *ngIf="linkControl.invalid">Must Be A Valid Link</mat-error>
       </mat-form-field>
     </div>

@@ -6,6 +6,7 @@ import { StreamerPoll } from 'app/models/streamer-poll';
 import { StreamerPollsRequestsService } from 'app/core/services/streamer-polls-requests.service';
 import { StreamerPollsVotesService } from 'app/core/services/streamer-polls-votes.service';
 import { StreamerPollRequest } from 'app/models/streamer-poll-request';
+import { BotService } from 'app/core/services/bot.service';
 
 @Component({
   selector: 'app-streamer-polls',
@@ -13,26 +14,9 @@ import { StreamerPollRequest } from 'app/models/streamer-poll-request';
   styleUrls: ['./streamer-polls.component.css']
 })
 export class StreamerPollsComponent implements OnInit {
-  constructor(
-    private streamerPollsService: StreamerPollsService,
-    private streamerPollsRequestService: StreamerPollsRequestsService,
-    private streamerPollsVotesService: StreamerPollsVotesService,
-    private authService: AuthService
-  ) {}
+  constructor(private authService: AuthService, private botService: BotService) {}
 
   ngOnInit() {
-    this.refreshData();
-  }
-
-  refreshData() {
-    this.getPollResults();
-  }
-
-  getPollResults() {
-    this.streamerPollsService
-      .getAll({ user_id: this.authService.currentUser.id })
-      .subscribe((polls: StreamerPoll[]) => {
-        console.log('polls', polls);
-      });
+    this.botService.use(this.authService.currentUser);
   }
 }

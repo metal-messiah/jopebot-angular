@@ -3,7 +3,7 @@ import { User } from './user';
 export class StreamerPollVote implements Entity {
   id?: number;
   user: User;
-  streamerPollRequestId: number;
+  streamer_poll_request_id: number;
 
   createdAt?: Date;
   createdBy?: User;

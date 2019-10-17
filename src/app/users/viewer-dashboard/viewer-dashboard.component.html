@@ -1,171 +1,37 @@
 <h1 *ngIf="userFromId">{{ userFromId.displayName }}</h1>
-<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p>
-<div class="modules-container">
-  <div
-    id="request-queue"
-    class="module"
-    *ngIf="authService.currentUser && userFromId"
-  >
-    <h3>Request Queue</h3>
-    <mat-progress-bar
-      *ngIf="fetching.requestQueue"
-      mode="indeterminate"
-    ></mat-progress-bar>
-    <div class="item-container">
-      <div
-        class="item-card"
-        *ngFor="let request of requestQueue; let i = index"
-        [matBadge]="i + 1"
-        matBadgePosition="before"
-      >
-        <div class="item-card-row">
-          <div class="item-card-title">{{ getRequestMessage(request) }}</div>
-          <div
-            class="item-card-logo"
-            [ngStyle]="{
-              backgroundImage: 'url(' + request.createdBy.logo + ')'
-            }"
-            [matTooltip]="request.user.displayName"
-            matTooltipPosition="left"
-          ></div>
-        </div>
-        <div class="item-card-row">
-          <div class="item-card-date">
-            {{ request.createdAt | date: "medium" }}
-          </div>
-
-          <button
-            mat-icon-button
-            color="warn"
-            [disabled]="!request.song"
-            (click)="showSongInfo(request.song)"
-            matTooltip="Show Song Info"
-            matTooltipPosition="left"
-          >
-            <i class="fas fa-music"></i>
-          </button>
-          <button
-            mat-icon-button
-            color="warn"
-            [disabled]="!request.link"
-            (click)="openLink(request.link)"
-            matTooltip="Open Link"
-            matTooltipPosition="left"
-          >
-            <i class="fas fa-link"></i>
-          </button>
-          <button
-            mat-icon-button
-            [matMenuTriggerFor]="itemCardMenu"
-            [disabled]="shouldDisableMenu(request)"
-            matTooltip="More Actions"
-            matTooltipPosition="right"
-            (click)="setMenuTarget(request)"
-          >
-            <i class="fas fa-ellipsis-v"></i>
-          </button>
-        </div>
+<div class="inner-content">
+  <div>
+    <div class="loading-container">
+      <div>
+        <div class="message-container" *ngIf="message">{{ message }}</div>
       </div>
     </div>
-  </div>
-
-  <div
-    id="played-requests"
-    class="module"
-    *ngIf="authService.currentUser && userFromId"
-  >
-    <h3>Played Requests</h3>
-    <mat-progress-bar
-      *ngIf="fetching.playedRequests"
-      mode="indeterminate"
-    ></mat-progress-bar>
-    <div class="item-container">
-      <div
-        class="item-card"
-        *ngFor="let request of playedRequests; let i = index"
-        [matBadge]="playedRequests.length - i"
-        matBadgePosition="before"
-      >
-        <div class="item-card-row">
-          <div class="item-card-title">{{ getRequestMessage(request) }}</div>
-          <div
-            class="item-card-logo"
-            [ngStyle]="{
-              backgroundImage: 'url(' + request.createdBy.logo + ')'
-            }"
-            [matTooltip]="request.user.displayName"
-            matTooltipPosition="left"
-          ></div>
-        </div>
-        <div class="item-card-row">
-          <div class="item-card-date">
-            {{ request.played | date: "medium" }}
-          </div>
-          <button
-            mat-icon-button
-            color="warn"
-            [disabled]="!request.song"
-            (click)="showSongInfo(request.song)"
-            matTooltip="Show Song Info"
-            matTooltipPosition="left"
-          >
-            <i class="fas fa-music"></i>
-          </button>
-          <button
-            mat-icon-button
-            color="warn"
-            [disabled]="!request.link"
-            (click)="openLink(request.link)"
-            matTooltip="Open Link"
-            matTooltipPosition="left"
-          >
-            <i class="fas fa-link"></i>
-          </button>
-        </div>
-      </div>
+    <div class="modules-container">
+      <app-request-card [type]="requestCardTypes.REQUEST_QUEUE" [requests]="botService.requestQueue"></app-request-card>
+      <app-request-card [type]="requestCardTypes.PLAYED_REQUESTS" [requests]="botService.playedRequests">
+      </app-request-card>
+      <app-poll-card [polls]="botService.polls"> </app-poll-card>
+      <button [disabled]="!canRequest()" (click)="newRequest()" id="new-request-button" mat-fab color="warn">
+        <i class="fas fa-plus-circle"></i>
+      </button>
+      <mat-toolbar class="bottom-bar">
+        <button
+          mat-flat-button
+          (click)="scrollTo('request-queue')"
+          matTooltip="Request Queue"
+          matTooltipPosition="above"
+        >
+          <i class="fas fa-list-ol"></i>
+        </button>
+        <button
+          mat-flat-button
+          (click)="scrollTo('played-requests')"
+          matTooltip="Played Requests"
+          matTooltipPosition="above"
+        >
+          <i class="fas fa-clipboard-check"></i>
+        </button>
+      </mat-toolbar>
     </div>
   </div>
-
-  <button
-    [disabled]="!canRequest()"
-    (click)="newRequest()"
-    id="new-request-button"
-    mat-fab
-    color="warn"
-  >
-    <i class="fas fa-plus-circle"></i>
-  </button>
-
-  <mat-menu #itemCardMenu="matMenu" yPosition="below" xPosition="after">
-    <button mat-menu-item (click)="editRequest()">
-      <i class="fas fa-edit"></i> Edit
-    </button>
-    <button mat-menu-item (click)="deleteRequest()">
-      <i class="fas fa-trash-alt"></i> Delete
-    </button>
-  </mat-menu>
-
-  <mat-spinner
-    color="accent"
-    *ngIf="!authService.currentUser || (!userFromId && !errorMsg)"
-  ></mat-spinner>
 </div>
-
-<mat-toolbar class="bottom-bar">
-  <button
-    mat-flat-button
-    (click)="scrollTo('request-queue')"
-    matTooltip="Request Queue"
-    matTooltipPosition="above"
-  >
-    <i class="fas fa-list-ol"></i>
-  </button>
-  <button
-    mat-flat-button
-    (click)="scrollTo('played-requests')"
-    matTooltip="Played Requests"
-    matTooltipPosition="above"
-  >
-    <i class="fas fa-clipboard-check"></i>
-  </button>
-</mat-toolbar>

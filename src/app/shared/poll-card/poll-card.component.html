@@ -1,0 +1,47 @@
+<div id="polls" class="module" *ngIf="authService.currentUser">
+  <h3>Polls</h3>
+  <mat-progress-bar *ngIf="botService.fetching.polls" mode="indeterminate"></mat-progress-bar>
+  <div class="item-container">
+    <div class="item-card" *ngFor="let poll of polls; let i = index" matBadgePosition="before">
+      <div
+        class="item-card-row"
+        *ngFor="let pollRequest of poll.requests; let prI = index"
+        [ngStyle]="{ background: getRowColor(prI) }"
+        [matBadge]="pollRequest.votes.length"
+      >
+        <div class="item-card-title">
+          {{ botService.getRequestMessage(pollRequest.request) }}
+        </div>
+        <div>
+          <button
+            color="primary"
+            [disabled]="userHasVoted(poll) && !userHasVotedOnThisRequest(pollRequest)"
+            (click)="vote(pollRequest)"
+            matTooltip="Cast Vote"
+            matTooltipPosition="after"
+            mat-fab
+          >
+            <i class="fas fa-check"></i>
+          </button>
+        </div>
+      </div>
+      <div class="item-card-row" *ngIf="shouldShowChart(poll)">
+        <canvas
+          baseChart
+          [data]="charts[poll.id].data"
+          [labels]="charts[poll.id].labels"
+          [chartType]="charts[poll.id].type"
+          [options]="charts[poll.id].options"
+          [plugins]="charts[poll.id].plugins"
+          [legend]="charts[poll.id].legend"
+          [colors]="charts[poll.id].colors"
+        >
+        </canvas>
+      </div>
+      <div class="item-card-row">
+        <div class="item-card-date">Last Updated: {{ getLatestPollUpdate(poll) | date: 'short' }}</div>
+        <button *ngIf="canClosePoll()" mat-flat-button matTooltip="Toggle Poll">{{ getToggleMessage(poll) }}</button>
+      </div>
+    </div>
+  </div>
+</div>

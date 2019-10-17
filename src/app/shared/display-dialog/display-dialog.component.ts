@@ -1,10 +1,10 @@
-import { Component, Inject, OnInit } from "@angular/core";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  selector: "mds-display-dialog",
-  templateUrl: "./display-dialog.component.html",
-  styleUrls: ["./display-dialog.component.css"]
+  selector: 'app-display-dialog',
+  templateUrl: './display-dialog.component.html',
+  styleUrls: ['./display-dialog.component.css']
 })
 export class DisplayDialogComponent implements OnInit {
   title: string;

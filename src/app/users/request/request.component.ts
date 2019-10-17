@@ -12,11 +12,7 @@ import { User } from 'app/models/user';
 import { AuthService } from 'app/core/services/auth.service';
 import { Request } from 'app/models/request';
 import { RequestService } from 'app/core/services/request.service';
-
-import { Location } from '@angular/common';
-import { StreamerSettingsService } from 'app/core/services/streamer-settings.service';
-import { StreamerSettings } from 'app/models/streamer-settings';
-import { tables } from 'app/enums/tables';
+import { BotService } from 'app/core/services/bot.service';
 
 @Component({
   selector: 'app-request',
@@ -44,7 +40,6 @@ export class RequestComponent implements OnInit {
   customMessageControl: FormControl;
   linkControl: FormControl;
 
-  streamerSettings: StreamerSettings;
   userRequests: number;
 
   fuse: Fuse<any>;
@@ -56,17 +51,18 @@ export class RequestComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private requestService: RequestService,
-    private streamerSettingsService: StreamerSettingsService
+    private botService: BotService
   ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(async params => {
       this.streamerIdParam = params.get('userid');
+      this.botService.use(this.streamerIdParam);
       this.requestIdParam = params.get('requestid');
       if (this.requestIdParam) {
         this.populateForms();
-        this.updateCounts();
       }
+      this.updateCounts();
       this.fetchSongs();
     });
 
@@ -83,14 +79,7 @@ export class RequestComponent implements OnInit {
   }
 
   updateCounts() {
-    this.streamerSettingsService
-      .getAll({ user_id: this.authService.currentUser.id })
-      .subscribe((streamerSettings: StreamerSettings[]) => {
-        if (streamerSettings.length) {
-          this.streamerSettings = streamerSettings[0];
-        }
-      });
-
+    console.log('update counts!');
     this.requestService
       .count({
         user_id: this.authService.currentUser.id,
@@ -170,37 +159,31 @@ export class RequestComponent implements OnInit {
   }
 
   submitNewRequest() {
-    if (this.streamerSettings.requestsPerUser > this.userRequests || this.requestIdParam) {
+    console.log(this.botService.streamerSettings.requestsPerUser, this.userRequests, this.requestIdParam);
+    console.log(this.streamerIdParam);
+    if (this.botService.streamerSettings.requestsPerUser > this.userRequests || this.requestIdParam) {
       this.submitting = true;
       const song: string = this.selectedSong ? JSON.stringify(this.selectedSong) : null;
       const link: URL = this.linkControl.valid ? this.linkControl.value : null;
       const message: string = this.customMessageControl.value ? this.customMessageControl.value : null;
-
-      this.userService.getOneById(this.streamerIdParam).subscribe((user: User) => {
-        const options = {
-          id: this.requestIdParam,
-          message: message || null,
-          user: this.authService.currentUser,
-          streamer: user,
-          song: song,
-          link: link
-        };
-        const request = new Request(options);
-
-        if (request.id) {
-          this.requestService.update(request).subscribe(resp => {
-            // console.log(this.route, this.router);
-            this.router.navigate(['/users', this.streamerIdParam]);
-          });
-        } else {
-          this.requestService.create(request).subscribe(resp => {
-            // console.log(this.route, this.router);
-            this.router.navigate(['/users', this.streamerIdParam]);
-          });
-        }
-      });
-    } else {
-      console.log('TOO MANY REQUESTS!');
+      const options = {
+        id: this.requestIdParam,
+        message: message || null,
+        user: this.authService.currentUser,
+        streamer: this.botService.user,
+        song: song,
+        link: link
+      };
+      console.log(options);
+      const request = new Request(options);
+      console.log(request);
+      this.botService.submitNewRequest(request).subscribe(
+        () => {
+          this.submitting = false;
+          this.router.navigate(['/users', this.streamerIdParam]);
+        },
+        err => console.log(err)
+      );
     }
   }
 }

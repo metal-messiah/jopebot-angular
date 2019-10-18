@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+<div mat-dialog-content>
+  <mat-form-field color="accent">
+    <mat-select [formControl]="selectControl" multiple>
+      <mat-select-trigger>
+        {{ 'Selected ' + selectControl.value.length.toLocaleString() + ' Items' }}
+      </mat-select-trigger>
+      <mat-option *ngFor="let option of options; let i = index" [value]="option" color="accent">
+        {{ labels[i] }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions style="justify-content: space-between;">
+  <button type="button" mat-raised-button mat-dialog-close color="warn">
+    Cancel
+  </button>
+  <button
+    type="button"
+    *ngFor="let b of extraButtonLabels; let i = index"
+    mat-raised-button
+    [mat-dialog-close]="extraButtonActions[i]"
+    color="accent"
+  >
+    {{ b }}
+  </button>
+  <button
+    type="button"
+    [disabled]="!selectControl.valid"
+    mat-raised-button
+    [mat-dialog-close]="selectControl.value"
+    color="primary"
+  >
+    Submit
+  </button>
+</div>

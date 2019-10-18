@@ -2,26 +2,62 @@
   <h3>Polls</h3>
   <mat-progress-bar *ngIf="botService.fetching.polls" mode="indeterminate"></mat-progress-bar>
   <div class="item-container">
+    <button
+      *ngIf="!botService.fetching.polls && shouldShowAddPoll()"
+      mat-flat-button
+      color="primary"
+      (click)="botService.addPoll()"
+    >
+      Add Poll
+    </button>
     <div class="item-card" *ngFor="let poll of polls; let i = index" matBadgePosition="before">
       <div
         class="item-card-row"
         *ngFor="let pollRequest of poll.requests; let prI = index"
-        [ngStyle]="{ background: getRowColor(prI) }"
         [matBadge]="pollRequest.votes.length"
       >
-        <div class="item-card-title">
+        <div class="item-card-title" [ngStyle]="{ color: getRowColor(prI) }">
           {{ botService.getRequestMessage(pollRequest.request) }}
         </div>
         <div>
           <button
-            color="primary"
-            [disabled]="userHasVoted(poll) && !userHasVotedOnThisRequest(pollRequest)"
-            (click)="vote(pollRequest)"
-            matTooltip="Cast Vote"
+            class="vote-button"
+            [disabled]="!poll.isOpen"
+            *ngIf="shouldShowPlayButton(poll)"
+            (click)="playVote(poll, pollRequest)"
+            matTooltip="Play Request"
             matTooltipPosition="after"
             mat-fab
           >
-            <i class="fas fa-check"></i>
+            <i
+              [ngClass]="{
+                fas: true,
+                'vote-icon': true,
+                'fa-play': botService.playing !== pollRequest.request.id,
+                'fa-spinner': botService.playing === pollRequest.request.id,
+                'fa-pulse': botService.playing === pollRequest.request.id
+              }"
+            ></i>
+          </button>
+          <button
+            class="vote-button"
+            [disabled]="voting"
+            *ngIf="shouldShowVoteButton(poll, pollRequest)"
+            (click)="vote(pollRequest)"
+            [matTooltip]="userHasVotedOnThisRequest(pollRequest) ? 'Revoke Vote' : 'Cast Vote'"
+            matTooltipPosition="after"
+            mat-fab
+          >
+            <i
+              [ngClass]="{
+                fas: true,
+                'vote-icon': true,
+                'fa-check': !userHasVotedOnThisRequest(pollRequest) && !voting,
+                'fa-thumbs-up': userHasVotedOnThisRequest(pollRequest) && !voting,
+                'fa-spinner': voting,
+                'fa-pulse': voting
+              }"
+            ></i>
           </button>
         </div>
       </div>
@@ -39,8 +75,44 @@
         </canvas>
       </div>
       <div class="item-card-row">
-        <div class="item-card-date">Last Updated: {{ getLatestPollUpdate(poll) | date: 'short' }}</div>
-        <button *ngIf="canClosePoll()" mat-flat-button matTooltip="Toggle Poll">{{ getToggleMessage(poll) }}</button>
+        <div class="item-card-date">Updated At<br />{{ getLatestPollUpdate(poll) | date: 'short' }}</div>
+
+        <div *ngIf="toggling" class="item-card-status"><i class="fas fa-spinner fa-pulse"></i></div>
+        <button
+          [disabled]="toggling"
+          *ngIf="canClosePoll()"
+          (click)="togglePoll(poll)"
+          mat-button
+          matTooltip="Toggle Poll"
+          [ngStyle]="{ color: poll.isOpen ? 'green' : '#ff5722' }"
+        >
+          <span *ngIf="!toggling" class="item-card-status" [ngStyle]="{ color: poll.isOpen ? 'green' : '#ff5722' }">
+            {{ poll.isOpen ? 'Open' : 'Closed' }}
+          </span>
+          <i [ngClass]="{ fas: true, 'fa-toggle-on': poll.isOpen, 'fa-toggle-off': !poll.isOpen }"></i>
+        </button>
+        <button
+          [disabled]="toggling"
+          *ngIf="canEditRequests(poll)"
+          (click)="editRequests(poll)"
+          mat-icon-button
+          color="accent"
+          matTooltip="Change Requests"
+        >
+          <!-- <i [ngClass]="{ fas: true, 'fa-toggle-on': poll.isOpen, 'fa-toggle-off': !poll.isOpen }"></i> -->
+          <i class="fas fa-list"></i>
+        </button>
+        <button
+          [disabled]="toggling"
+          *ngIf="canToggleGraph(poll)"
+          (click)="toggleGraph(poll)"
+          mat-icon-button
+          color="accent"
+          matTooltip="Toggle Graph"
+        >
+          <!-- <i [ngClass]="{ fas: true, 'fa-toggle-on': poll.isOpen, 'fa-toggle-off': !poll.isOpen }"></i> -->
+          <i class="fas fa-chart-pie"></i>
+        </button>
       </div>
     </div>
   </div>

@@ -1,0 +1,9 @@
+.mat-raised-button {
+  min-width: unset;
+}
+
+.mat-dialog-content {
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

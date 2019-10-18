@@ -11,6 +11,8 @@ import { DisplayDialogComponent } from './display-dialog/display-dialog.componen
 import { RequestCardComponent } from './request-card/request-card.component';
 import { PollCardComponent } from './poll-card/poll-card.component';
 import { ChartsModule } from 'ng2-charts';
+import { SelectDialogComponent } from './select-dialog/select-dialog.component';
+import { InputDialogComponent } from './input-dialog/input-dialog.component';
 
 @NgModule({
   imports: [CommonModule, CustomMaterialModule, FormsModule, ReactiveFormsModule, ChartsModule],
@@ -19,6 +21,8 @@ import { ChartsModule } from 'ng2-charts';
     PathNotFoundComponent,
     ConfirmDialogComponent,
     DisplayDialogComponent,
+    SelectDialogComponent,
+    InputDialogComponent,
     RequestCardComponent,
     PollCardComponent
   ],
@@ -27,6 +31,8 @@ import { ChartsModule } from 'ng2-charts';
     PathNotFoundComponent,
     ConfirmDialogComponent,
     DisplayDialogComponent,
+    SelectDialogComponent,
+    InputDialogComponent,
     CustomMaterialModule,
     HttpClientModule,
     FormsModule,
@@ -34,6 +40,6 @@ import { ChartsModule } from 'ng2-charts';
     RequestCardComponent,
     PollCardComponent
   ],
-  entryComponents: [ConfirmDialogComponent, DisplayDialogComponent]
+  entryComponents: [ConfirmDialogComponent, DisplayDialogComponent, SelectDialogComponent, InputDialogComponent]
 })
 export class SharedModule {}

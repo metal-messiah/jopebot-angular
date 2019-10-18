@@ -84,6 +84,7 @@
 </div>
 <mat-menu #itemCardMenu="matMenu" yPosition="below" xPosition="after">
   <button mat-menu-item *ngIf="canEdit()" (click)="editRequest()"><i class="fas fa-edit"></i> Edit</button>
+
   <button mat-menu-item *ngIf="canDelete()" (click)="botService.deleteRequest()">
     <i class="fas fa-trash-alt"></i> Delete
   </button>

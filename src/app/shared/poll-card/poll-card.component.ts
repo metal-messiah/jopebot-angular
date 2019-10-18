@@ -6,10 +6,13 @@ import { BotService } from 'app/core/services/bot.service';
 import { ChartType, ChartOptions } from 'chart.js';
 import { SingleDataSet, Label, monkeyPatchChartJsLegend, monkeyPatchChartJsTooltip, Color } from 'ng2-charts';
 import { StreamerPollRequest } from 'app/models/streamer-poll-request';
+import { StreamerPollRequest as InputPollRequest } from 'app/models/server-input/streamer-poll-request';
 import { TinyColor, random as randomColor } from '@ctrl/tinycolor';
 import { Route, ActivatedRoute } from '@angular/router';
 import { StreamerPollsVotesService } from 'app/core/services/streamer-polls-votes.service';
 import { StreamerPollVote } from 'app/models/streamer-poll-vote';
+import { StreamerPollVote as InputPollVote } from 'app/models/server-input/streamer-poll-vote';
+import { StreamerPollsService } from 'app/core/services/streamer-polls.service';
 
 class ChartConfig {
   constructor(
@@ -31,14 +34,22 @@ class ChartConfig {
 export class PollCardComponent implements OnInit, OnChanges {
   @Input() polls: StreamerPoll[];
   view: ParentComponent;
-  colors = this.getRandomHexColors(10);
+
+  ////////// orange, soft yellow, warn red, lavender, soft pink, green
+  colors = ['#ffab40', '#fdfd96', '#ff5722', '#b47bb6', '#ffc0cb ', '#026440', '#00468b'];
+
+  voting = false;
+  toggling = false;
+
+  hiddenGraphs = [];
 
   public charts = {};
   constructor(
     private botService: BotService,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private streamerPollsVotesService: StreamerPollsVotesService
+    private streamerPollsVotesService: StreamerPollsVotesService,
+    private streamerPollsService: StreamerPollsService
   ) {
     monkeyPatchChartJsTooltip();
     monkeyPatchChartJsLegend();
@@ -46,6 +57,7 @@ export class PollCardComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.view = this.route.component['name'];
+    this.colors.push(...this.getRandomHexColors(10));
     this.buildCharts();
   }
 
@@ -56,9 +68,11 @@ export class PollCardComponent implements OnInit, OnChanges {
       }
       return 1 === 1;
     });
+    this.polls.sort((a, b) => (a.isOpen === b.isOpen ? 0 : a.isOpen ? -1 : 1));
     this.polls.forEach(poll => {
-      poll.requests.sort((a, b) => b.votes.length - a.votes.length);
+      poll.requests.sort((a, b) => b.id - a.id);
     });
+    console.log(this.polls);
     this.buildCharts();
   }
 
@@ -77,6 +91,12 @@ export class PollCardComponent implements OnInit, OnChanges {
       );
       this.charts[poll.id] = chartConfig;
     });
+    this.clearFlags();
+  }
+
+  clearFlags() {
+    this.voting = false;
+    this.toggling = false;
   }
 
   shuffleArray(array) {
@@ -93,10 +113,10 @@ export class PollCardComponent implements OnInit, OnChanges {
   }
 
   getChartColors(poll: StreamerPoll) {
-    // this.shuffleArray(this.colors);
     return [
       {
-        backgroundColor: this.colors.slice(0, poll.requests.length)
+        backgroundColor: this.colors.slice(0, poll.requests.length),
+        borderColor: '#000'
       }
     ];
   }
@@ -142,12 +162,20 @@ export class PollCardComponent implements OnInit, OnChanges {
 
   vote(pollRequest: StreamerPollRequest) {
     if (!this.userHasVotedOnThisRequest(pollRequest)) {
-      const vote = new StreamerPollVote({
-        user: this.authService.currentUser,
+      this.voting = true;
+      const vote = new InputPollVote({
+        user_id: this.authService.currentUser.id,
         streamer_poll_request_id: pollRequest.id
       });
       this.streamerPollsVotesService.create(vote).subscribe(vote => {
         console.log(vote);
+      });
+    } else {
+      this.voting = true;
+      const vote = pollRequest.votes.filter(vote => vote.user.id === this.authService.currentUser.id)[0];
+
+      this.streamerPollsVotesService.delete(vote.id).subscribe(v => {
+        console.log(`deleted ${v}`);
       });
     }
   }
@@ -168,10 +196,62 @@ export class PollCardComponent implements OnInit, OnChanges {
   }
 
   canClosePoll() {
-    return this.view === ParentComponent.BotComponent;
+    return !this.toggling && this.view === ParentComponent.BotComponent;
   }
 
   shouldShowChart(poll: StreamerPoll) {
-    return this.charts[poll.id].data.reduce((prev, next) => prev + next) > 0;
+    const { data } = this.charts[poll.id];
+    return !this.hiddenGraphs.includes(poll.id) && data.length ? data.reduce((prev, next) => prev + next) > 0 : false;
+  }
+
+  shouldShowVoteButton(poll: StreamerPoll, pollRequest: StreamerPollRequest) {
+    if (this.view === ParentComponent.ViewerDashboardComponent) {
+      return (
+        poll.isOpen &&
+        ((this.userHasVoted(poll) && this.userHasVotedOnThisRequest(pollRequest)) || !this.userHasVoted(poll))
+      );
+    }
+    return false;
+  }
+
+  shouldShowAddPoll() {
+    return this.view === ParentComponent.BotComponent;
+  }
+
+  shouldShowPlayButton(poll: StreamerPoll) {
+    return !this.toggling && poll.isOpen && this.view === ParentComponent.BotComponent;
+  }
+
+  togglePoll(poll: StreamerPoll) {
+    this.toggling = true;
+    poll.isOpen = !poll.isOpen;
+    this.streamerPollsService.update(poll).subscribe(poll => {
+      console.log(poll);
+    });
+  }
+
+  playVote(poll: StreamerPoll, pollRequest: StreamerPollRequest) {
+    this.botService.play(pollRequest.request);
+    this.togglePoll(poll);
+  }
+
+  canEditRequests(poll: StreamerPoll): boolean {
+    return !this.toggling && this.view === ParentComponent.BotComponent;
+  }
+
+  editRequests(poll: StreamerPoll) {
+    this.botService.editPollRequests(poll, poll.requests);
+  }
+
+  canToggleGraph(): boolean {
+    return !this.toggling && this.view === ParentComponent.BotComponent;
+  }
+
+  toggleGraph(poll: StreamerPoll) {
+    if (this.hiddenGraphs.includes(poll.id)) {
+      this.hiddenGraphs = this.hiddenGraphs.filter(hg => hg !== poll.id);
+    } else {
+      this.hiddenGraphs.push(poll.id);
+    }
   }
 }

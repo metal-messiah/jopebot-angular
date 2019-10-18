@@ -10,13 +10,15 @@ import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog
 import { StreamerPoll } from 'app/models/streamer-poll';
 import { StreamerPollsService } from './streamer-polls.service';
 import { User } from 'app/models/user';
-import { StreamerSongsService } from './streamer-songs.service';
-import { StreamerSong } from 'app/models/streamer-song';
 import { UserService } from './user.service';
-import { Router } from '@angular/router';
-import { Observable, Subject, BehaviorSubject, ReplaySubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { SocketService } from './socket.service';
-
+import { StreamerPollRequest } from 'app/models/streamer-poll-request';
+import { StreamerPollRequest as InputPollRequest } from 'app/models/server-input/streamer-poll-request';
+import { StreamerPollsRequestsService } from './streamer-polls-requests.service';
+import { SelectDialogComponent } from 'app/shared/select-dialog/select-dialog.component';
+import { Validators } from '@angular/forms';
+import { InputDialogComponent } from 'app/shared/input-dialog/input-dialog.component';
 @Injectable({
   providedIn: 'root'
 })
@@ -49,7 +51,8 @@ export class BotService {
     private dialog: MatDialog,
     private streamerPollsService: StreamerPollsService,
     private userService: UserService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private streamerPollsRequestsService: StreamerPollsRequestsService
   ) {
     this.socketService.refreshDatasets$.subscribe(() => {
       this.refreshData();
@@ -90,8 +93,6 @@ export class BotService {
 
     this.fetching.requestQueue = false;
     this.fetching.playedRequests = false;
-
-    console.log(this.requestQueue);
   }
 
   sortByDateField(list: any[], property: string, asc: boolean) {
@@ -227,5 +228,166 @@ export class BotService {
 
   submitNewRequest(request: Request) {
     return request.id !== null ? this.requestService.update(request) : this.requestService.create(request);
+  }
+
+  async editPollRequests(poll: StreamerPoll, pollRequests: StreamerPollRequest[]) {
+    const labels = this.requestQueue.map(request => this.getRequestMessage(request));
+    const initialData = pollRequests.map(pr => pr.request);
+    console.log(initialData);
+    const requests: Request[] | string = await this.dialog
+      .open(SelectDialogComponent, {
+        data: {
+          title: 'Select Requests For Poll',
+          options: this.requestQueue,
+          labels,
+          extraButtonLabels: ['Random'],
+          extraButtonActions: ['__RANDOM__'],
+          initialData
+        }
+      })
+      .afterClosed()
+      .toPromise();
+
+    if (requests) {
+      if (requests === '__RANDOM__') {
+        const limit = this.requestQueue.length > 10 ? 10 : this.requestQueue.length;
+        const howManyRequests = await this.dialog
+          .open(InputDialogComponent, {
+            data: {
+              title: `Select Random Requests`,
+              placeholder: `Add Between 2 and ${limit} Requests to Poll`,
+              initialValue: 2,
+              inputType: 'number',
+              validators: [Validators.required, Validators.pattern(/^\d+$/), Validators.max(limit), Validators.min(2)]
+            }
+          })
+          .afterClosed()
+          .toPromise();
+
+        const clonedList = Object.assign([], this.requestQueue);
+        const randomRequests = [];
+        for (let i = 0; i < howManyRequests; i++) {
+          const idx = Math.floor(Math.random() * clonedList.length);
+          const r = clonedList.splice(idx, 1);
+          randomRequests.push(...r);
+        }
+
+        this.editPollRequestsOnServer(poll, randomRequests);
+      } else if (requests.length && typeof requests !== 'string') {
+        this.editPollRequestsOnServer(poll, requests);
+      }
+    }
+  }
+
+  editPollRequestsOnServer(poll: StreamerPoll, requests: Request[]) {
+    console.log('EDITING POLL!');
+    console.log(poll);
+
+    // Now we need to relate the requests to the poll!
+
+    poll.requests.forEach(pollRequest => {
+      if (!requests.map(r => r.id).includes(pollRequest.request.id)) {
+        // the old poll requests dont match the new set of requests anymore, delete the old one
+        this.streamerPollsRequestsService.delete(pollRequest.id).subscribe(pr => {
+          console.log('deleted ', pr);
+        });
+      } else {
+        const idx = requests.findIndex(r => r.id === pollRequest.request.id);
+        requests.splice(idx, 1);
+      }
+    });
+    if (requests.length) {
+      requests.forEach(request => {
+        const pollRequest = new InputPollRequest({ request_id: request.id, streamer_poll_id: poll.id });
+        this.streamerPollsRequestsService.create(pollRequest).subscribe(pr => {
+          console.log('RELATED REQUEST TO POLL!', pr);
+          this.refreshData();
+        });
+      });
+    } else {
+      this.refreshData();
+    }
+  }
+
+  async addPoll() {
+    const labels = this.requestQueue.map(request => this.getRequestMessage(request));
+    const requests: Request[] | string = await this.dialog
+      .open(SelectDialogComponent, {
+        data: {
+          title: 'Select Requests To Add To Poll',
+          options: this.requestQueue,
+          labels,
+          extraButtonLabels: ['Random'],
+          extraButtonActions: ['__RANDOM__'],
+          initialData: []
+        }
+      })
+      .afterClosed()
+      .toPromise();
+
+    if (requests) {
+      if (requests === '__RANDOM__') {
+        const limit = this.requestQueue.length > 10 ? 10 : this.requestQueue.length;
+        const howManyRequests = await this.dialog
+          .open(InputDialogComponent, {
+            data: {
+              title: `Select Random Requests`,
+              placeholder: `Add Between 2 and ${limit} Requests to Poll`,
+              initialValue: 2,
+              inputType: 'number',
+              validators: [Validators.required, Validators.pattern(/^\d+$/), Validators.max(limit), Validators.min(2)]
+            }
+          })
+          .afterClosed()
+          .toPromise();
+
+        const clonedList = Object.assign([], this.requestQueue);
+        const randomRequests = [];
+        for (let i = 0; i < howManyRequests; i++) {
+          const idx = Math.floor(Math.random() * clonedList.length);
+          const r = clonedList.splice(idx, 1);
+          randomRequests.push(...r);
+        }
+
+        this.createPollAndAddRequests(randomRequests);
+      } else if (requests.length && typeof requests !== 'string') {
+        this.createPollAndAddRequests(requests);
+      }
+    }
+  }
+
+  createPollAndAddRequests(requests: Request[]) {
+    this.streamerPollsService.create({ user: this.user }).subscribe((poll: StreamerPoll) => {
+      console.log('MADE POLL!');
+      console.log(poll);
+
+      // Now we need to relate the requests to the new poll!
+
+      requests.forEach(request => {
+        const pollRequest = new InputPollRequest({ request_id: request.id, streamer_poll_id: poll.id });
+        this.streamerPollsRequestsService.create(pollRequest).subscribe(pr => {
+          console.log('RELATED REQUEST TO POLL!', pr);
+          this.refreshData();
+        });
+      });
+    });
+  }
+
+  async addRequestToPoll() {
+    const request = this.menuTarget;
+
+    const choice = await this.dialog.open(ConfirmDialogComponent, { data: { title: '' } });
+
+    const polls = await this.dialog
+      .open(SelectDialogComponent, {
+        data: { title: 'Select Poll', options: this.polls, displayField: 'id' }
+      })
+      .afterClosed()
+      .toPromise();
+
+    // const pollRequest = new InputPollRequest({ streamer_poll_id: poll.id, request_id: request.id });
+    // this.streamerPollsRequestsService.create(pollRequest).subscribe((pr: StreamerPollRequest) => {
+    //   console.log(pr);
+    // });
   }
 }

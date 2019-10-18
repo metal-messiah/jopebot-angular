@@ -67,6 +67,10 @@ export class RequestCardComponent implements OnInit {
     }
   }
 
+  canAddToPoll(): boolean {
+    return this.view === ParentComponent.BotComponent && this.type === RequestCardType.REQUEST_QUEUE;
+  }
+
   shouldDisableMenu(request: Request) {
     if (this.view === ParentComponent.ViewerDashboardComponent) {
       return request.user.id !== this.authService.currentUser.id;

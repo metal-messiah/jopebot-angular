@@ -43,6 +43,21 @@ h5 {
   padding-bottom: 100px;
 }
 
+.vote-button {
+  background: #333;
+  /* background-image: url('assets/images/background-texture.png');
+  background-blend-mode: color-burn; */
+  box-shadow: black 0px 0px 5px;
+}
+
+.vote-button:not([disabled]):hover {
+  background: #444;
+}
+
+.vote-icon {
+  color: white;
+}
+
 .item {
   padding: 10px;
   margin: 10px;
@@ -88,16 +103,18 @@ h5 {
   padding: 5px;
   margin-bottom: 10px;
   border-radius: 10px;
+  background: black;
 }
 
 .item-card-title {
   font-size: large;
-  color: black;
+  color: white;
   text-align: left;
   /* word-break: break-all; */
   text-overflow: ellipsis;
   padding: 0 2px;
   overflow: hidden;
+  margin-right: 10px;
 }
 
 .item-card-logo {
@@ -108,6 +125,10 @@ h5 {
 }
 
 .item-card-date {
+  font-size: xx-small;
+}
+
+.item-card-status {
   font-size: x-small;
 }
 

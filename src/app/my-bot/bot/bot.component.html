@@ -11,6 +11,7 @@
         [type]="requestCardTypes.PLAYED_REQUESTS"
         [requests]="botService.playedRequests"
       ></app-request-card>
+      <app-poll-card [polls]="botService.polls"> </app-poll-card>
       <mat-toolbar class="bottom-bar">
         <button
           mat-flat-button

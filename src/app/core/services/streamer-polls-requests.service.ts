@@ -7,11 +7,12 @@ import { CrudService } from '../../interfaces/crud-service';
 import { StreamerSettings } from 'app/models/streamer-settings';
 import { tables } from 'app/enums/tables';
 import { StreamerPollRequest } from 'app/models/streamer-poll-request';
+import { StreamerPollRequest as InputPollRequest } from 'app/models/server-input/streamer-poll-request';
 
 @Injectable({
   providedIn: 'root'
 })
-export class StreamerPollsRequestsService extends CrudService<StreamerPollRequest> {
+export class StreamerPollsRequestsService extends CrudService<StreamerPollRequest | InputPollRequest> {
   table: tables = tables.streamer_polls_requests;
   endpoint = `/api/${this.table}`;
 

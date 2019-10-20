@@ -1,13 +1,7 @@
 <mat-toolbar class="header-bar" color="primary">
   <mat-toolbar-row class="primary">
     <div>
-      <img
-        #logo
-        [@flipInY]="flipInY"
-        (click)="goHome()"
-        class="logo"
-        src="assets/images/logo.PNG"
-      />
+      <img #logo [@flipInY]="flipInY" (click)="goHome()" class="logo" src="assets/images/logo.PNG" />
       <button
         (click)="getAction()"
         mat-button
@@ -17,10 +11,7 @@
         class="auth-button"
       >
         <div class="auth-text">
-          <fa-icon
-            [icon]="getAuthIcon()"
-            [pulse]="getAuthIconPulse()"
-          ></fa-icon>
+          <fa-icon [icon]="getAuthIcon()" [pulse]="getAuthIconPulse()"></fa-icon>
           {{ getAuthText() }}
         </div>
         <div *ngIf="checkedLogin" class="auth-action">
@@ -40,9 +31,7 @@
       Blog
     </button>
     <!-- FORCE THE MENU TO THE RIGHT ALWAYS! -->
-    <button mat-button [matMenuTriggerFor]="extras">
-      More
-    </button>
+    <button mat-button [matMenuTriggerFor]="extras">More</button>
     <mat-menu #extras="matMenu">
       <button mat-menu-item routerLink="/about" routerLinkActive="mat-warn">
         About

@@ -7,7 +7,6 @@ import { StreamerSettingsComponent } from './streamer-settings/streamer-settings
 import { StreamerSongsComponent } from './streamer-songs/streamer-songs.component';
 import { BotComponent } from './bot/bot.component';
 import { SocketGuard } from 'app/core/services/socket.guard';
-import { StreamerPollsComponent } from './streamer-polls/streamer-polls.component';
 
 const routes: Routes = [
   {
@@ -26,14 +25,9 @@ const routes: Routes = [
         canActivate: [AuthGuard]
       },
       {
-        path: 'songs',
+        path: 'files',
         component: StreamerSongsComponent,
         canActivate: [AuthGuard]
-      },
-      {
-        path: 'polls',
-        component: StreamerPollsComponent,
-        canActivate: [AuthGuard, SocketGuard]
       }
     ]
   }

@@ -201,7 +201,9 @@ export class PollCardComponent implements OnInit, OnChanges {
 
   shouldShowChart(poll: StreamerPoll) {
     const { data } = this.charts[poll.id];
-    return !this.hiddenGraphs.includes(poll.id) && data.length ? data.reduce((prev, next) => prev + next) > 0 : false;
+    return this.userHasVoted(poll) && !this.hiddenGraphs.includes(poll.id) && data.length
+      ? data.reduce((prev, next) => prev + next) > 0
+      : false;
   }
 
   shouldShowVoteButton(poll: StreamerPoll, pollRequest: StreamerPollRequest) {
@@ -253,5 +255,14 @@ export class PollCardComponent implements OnInit, OnChanges {
     } else {
       this.hiddenGraphs.push(poll.id);
     }
+  }
+
+  canDeletePoll(): boolean {
+    return !this.toggling && this.view === ParentComponent.BotComponent;
+  }
+
+  deletePoll(poll: StreamerPoll) {
+    console.log(poll);
+    this.botService.deletePoll(poll);
   }
 }

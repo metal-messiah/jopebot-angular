@@ -13,6 +13,8 @@ export class SelectDialogComponent implements OnInit {
   labels: string[]; // in the length and order of the options
   selectControl: FormControl;
 
+  disclaimer: string;
+
   extraButtonLabels: string[];
   extraButtonActions: string[];
 
@@ -21,16 +23,13 @@ export class SelectDialogComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     this.title = data.title;
     this.options = data.options;
-    console.log(this.options);
     this.initialData = data.initialData;
-    console.log(this.initialData);
     const matches = this.options.filter(o => this.initialData.map(i => i.id).includes(o.id));
-    console.log(matches);
     this.selectControl = new FormControl(matches, [Validators.required]);
     this.labels = data.labels;
-    console.log(this.labels);
     this.extraButtonLabels = data.extraButtonLabels; // list of strings
     this.extraButtonActions = data.extraButtonActions; // list of functions
+    this.disclaimer = data.disclaimer;
   }
 
   ngOnInit() {}

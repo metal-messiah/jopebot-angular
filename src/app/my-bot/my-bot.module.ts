@@ -7,16 +7,9 @@ import { SharedModule } from 'app/shared/shared.module';
 import { BotComponent } from './bot/bot.component';
 import { StreamerSongsComponent } from './streamer-songs/streamer-songs.component';
 import { StreamerSettingsComponent } from './streamer-settings/streamer-settings.component';
-import { StreamerPollsComponent } from './streamer-polls/streamer-polls.component';
 
 @NgModule({
-  declarations: [
-    MyBotComponent,
-    BotComponent,
-    StreamerSettingsComponent,
-    StreamerSongsComponent,
-    StreamerPollsComponent
-  ],
+  declarations: [MyBotComponent, BotComponent, StreamerSettingsComponent, StreamerSongsComponent],
   imports: [CommonModule, MyBotRoutingModule, SharedModule]
 })
 export class MyBotModule {}

@@ -25,6 +25,10 @@ h5 {
   text-overflow: ellipsis;
 }
 
+button {
+  font-family: 'Audiowide', cursive;
+}
+
 .loading-container {
   display: flex;
   align-items: center;
@@ -44,10 +48,10 @@ h5 {
 }
 
 .vote-button {
-  background: #333;
+  /* background: #333; */
   /* background-image: url('assets/images/background-texture.png');
   background-blend-mode: color-burn; */
-  box-shadow: black 0px 0px 5px;
+  /* box-shadow: black 0px 0px 5px; */
 }
 
 .vote-button:not([disabled]):hover {

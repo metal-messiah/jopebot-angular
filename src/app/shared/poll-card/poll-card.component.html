@@ -8,13 +8,13 @@
       color="primary"
       (click)="botService.addPoll()"
     >
-      Add Poll
+      <i class="fas fa-plus-circle"></i> Add Poll
     </button>
     <div class="item-card" *ngFor="let poll of polls; let i = index" matBadgePosition="before">
       <div
         class="item-card-row"
         *ngFor="let pollRequest of poll.requests; let prI = index"
-        [matBadge]="pollRequest.votes.length"
+        [matBadge]="userHasVoted(poll) ? pollRequest.votes.length : ''"
       >
         <div class="item-card-title" [ngStyle]="{ color: getRowColor(prI) }">
           {{ botService.getRequestMessage(pollRequest.request) }}
@@ -27,7 +27,7 @@
             (click)="playVote(poll, pollRequest)"
             matTooltip="Play Request"
             matTooltipPosition="after"
-            mat-fab
+            mat-icon-button
           >
             <i
               [ngClass]="{
@@ -46,13 +46,13 @@
             (click)="vote(pollRequest)"
             [matTooltip]="userHasVotedOnThisRequest(pollRequest) ? 'Revoke Vote' : 'Cast Vote'"
             matTooltipPosition="after"
-            mat-fab
+            mat-icon-button
           >
             <i
               [ngClass]="{
                 fas: true,
                 'vote-icon': true,
-                'fa-check': !userHasVotedOnThisRequest(pollRequest) && !voting,
+                'fa-check-circle': !userHasVotedOnThisRequest(pollRequest) && !voting,
                 'fa-thumbs-up': userHasVotedOnThisRequest(pollRequest) && !voting,
                 'fa-spinner': voting,
                 'fa-pulse': voting
@@ -76,7 +76,13 @@
       </div>
       <div class="item-card-row">
         <div class="item-card-date">Updated At<br />{{ getLatestPollUpdate(poll) | date: 'short' }}</div>
-
+        <span
+          *ngIf="!toggling && !canClosePoll()"
+          class="item-card-status"
+          [ngStyle]="{ color: poll.isOpen ? 'green' : '#ff5722' }"
+        >
+          Poll Is {{ poll.isOpen ? 'Open' : 'Closed' }}
+        </span>
         <div *ngIf="toggling" class="item-card-status"><i class="fas fa-spinner fa-pulse"></i></div>
         <button
           [disabled]="toggling"
@@ -99,7 +105,6 @@
           color="accent"
           matTooltip="Change Requests"
         >
-          <!-- <i [ngClass]="{ fas: true, 'fa-toggle-on': poll.isOpen, 'fa-toggle-off': !poll.isOpen }"></i> -->
           <i class="fas fa-list"></i>
         </button>
         <button
@@ -110,8 +115,18 @@
           color="accent"
           matTooltip="Toggle Graph"
         >
-          <!-- <i [ngClass]="{ fas: true, 'fa-toggle-on': poll.isOpen, 'fa-toggle-off': !poll.isOpen }"></i> -->
           <i class="fas fa-chart-pie"></i>
+        </button>
+        <button
+          [disabled]="toggling"
+          *ngIf="canDeletePoll()"
+          (click)="deletePoll(poll)"
+          mat-icon-button
+          color="warn"
+          matTooltip="Delete Poll"
+        >
+          <i *ngIf="!botService.deleting" class="fas fa-trash-alt"></i
+          ><i *ngIf="botService.deleting" class="fas fa-spinner fa-pulse"></i>
         </button>
       </div>
     </div>

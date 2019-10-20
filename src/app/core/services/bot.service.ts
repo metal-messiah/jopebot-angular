@@ -11,7 +11,7 @@ import { StreamerPoll } from 'app/models/streamer-poll';
 import { StreamerPollsService } from './streamer-polls.service';
 import { User } from 'app/models/user';
 import { UserService } from './user.service';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Observable, zip } from 'rxjs';
 import { SocketService } from './socket.service';
 import { StreamerPollRequest } from 'app/models/streamer-poll-request';
 import { StreamerPollRequest as InputPollRequest } from 'app/models/server-input/streamer-poll-request';
@@ -19,6 +19,7 @@ import { StreamerPollsRequestsService } from './streamer-polls-requests.service'
 import { SelectDialogComponent } from 'app/shared/select-dialog/select-dialog.component';
 import { Validators } from '@angular/forms';
 import { InputDialogComponent } from 'app/shared/input-dialog/input-dialog.component';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -44,6 +45,8 @@ export class BotService {
   polls: StreamerPoll[] = [];
 
   gotSettings$: ReplaySubject<void> = new ReplaySubject<void>();
+
+  deleting = false;
 
   constructor(
     private requestService: RequestService,
@@ -239,6 +242,7 @@ export class BotService {
         data: {
           title: 'Select Requests For Poll',
           options: this.requestQueue,
+          disclaimer: 'Removing a request will clear its votes!',
           labels,
           extraButtonLabels: ['Random'],
           extraButtonActions: ['__RANDOM__'],
@@ -280,33 +284,32 @@ export class BotService {
   }
 
   editPollRequestsOnServer(poll: StreamerPoll, requests: Request[]) {
-    console.log('EDITING POLL!');
-    console.log(poll);
-
-    // Now we need to relate the requests to the poll!
-
+    const changes = [];
     poll.requests.forEach(pollRequest => {
       if (!requests.map(r => r.id).includes(pollRequest.request.id)) {
         // the old poll requests dont match the new set of requests anymore, delete the old one
-        this.streamerPollsRequestsService.delete(pollRequest.id).subscribe(pr => {
-          console.log('deleted ', pr);
-        });
+        changes.push(this.streamerPollsRequestsService.delete(pollRequest.id));
       } else {
         const idx = requests.findIndex(r => r.id === pollRequest.request.id);
         requests.splice(idx, 1);
       }
     });
-    if (requests.length) {
-      requests.forEach(request => {
-        const pollRequest = new InputPollRequest({ request_id: request.id, streamer_poll_id: poll.id });
-        this.streamerPollsRequestsService.create(pollRequest).subscribe(pr => {
-          console.log('RELATED REQUEST TO POLL!', pr);
-          this.refreshData();
-        });
-      });
-    } else {
+
+    requests.forEach(request => {
+      const pollRequest = new InputPollRequest({ request_id: request.id, streamer_poll_id: poll.id });
+      changes.push(this.streamerPollsRequestsService.create(pollRequest));
+    });
+
+    zip(...changes).subscribe(d => {
       this.refreshData();
-    }
+    });
+  }
+
+  deletePoll(poll: StreamerPoll) {
+    this.deleting = true;
+    this.streamerPollsService.delete(poll.id).subscribe(poll => {
+      this.deleting = false;
+    });
   }
 
   async addPoll() {
@@ -358,36 +361,15 @@ export class BotService {
 
   createPollAndAddRequests(requests: Request[]) {
     this.streamerPollsService.create({ user: this.user }).subscribe((poll: StreamerPoll) => {
-      console.log('MADE POLL!');
-      console.log(poll);
-
       // Now we need to relate the requests to the new poll!
-
+      const changes = [];
       requests.forEach(request => {
         const pollRequest = new InputPollRequest({ request_id: request.id, streamer_poll_id: poll.id });
-        this.streamerPollsRequestsService.create(pollRequest).subscribe(pr => {
-          console.log('RELATED REQUEST TO POLL!', pr);
-          this.refreshData();
-        });
+        changes.push(this.streamerPollsRequestsService.create(pollRequest));
+      });
+      zip(...changes).subscribe(d => {
+        this.refreshData();
       });
     });
-  }
-
-  async addRequestToPoll() {
-    const request = this.menuTarget;
-
-    const choice = await this.dialog.open(ConfirmDialogComponent, { data: { title: '' } });
-
-    const polls = await this.dialog
-      .open(SelectDialogComponent, {
-        data: { title: 'Select Poll', options: this.polls, displayField: 'id' }
-      })
-      .afterClosed()
-      .toPromise();
-
-    // const pollRequest = new InputPollRequest({ streamer_poll_id: poll.id, request_id: request.id });
-    // this.streamerPollsRequestsService.create(pollRequest).subscribe((pr: StreamerPollRequest) => {
-    //   console.log(pr);
-    // });
   }
 }

@@ -19,6 +19,9 @@ import { StreamerPollsRequestsService } from './streamer-polls-requests.service'
 import { SelectDialogComponent } from 'app/shared/select-dialog/select-dialog.component';
 import { Validators } from '@angular/forms';
 import { InputDialogComponent } from 'app/shared/input-dialog/input-dialog.component';
+import { Tables } from 'app/enums/tables';
+import { LikesService } from './likes.service';
+import { Like } from 'app/models/like';
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +50,7 @@ export class BotService {
   gotSettings$: ReplaySubject<void> = new ReplaySubject<void>();
 
   deleting = false;
+  liking = null;
 
   constructor(
     private requestService: RequestService,
@@ -55,10 +59,12 @@ export class BotService {
     private streamerPollsService: StreamerPollsService,
     private userService: UserService,
     private socketService: SocketService,
-    private streamerPollsRequestsService: StreamerPollsRequestsService
+    private streamerPollsRequestsService: StreamerPollsRequestsService,
+    private likesService: LikesService
   ) {
-    this.socketService.refreshDatasets$.subscribe(() => {
-      this.refreshData();
+    this.socketService.refreshDatasets$.subscribe((table: Tables) => {
+      console.log('REFRESH FOR ', table);
+      this.refreshData(table);
     });
   }
 
@@ -96,6 +102,8 @@ export class BotService {
 
     this.fetching.requestQueue = false;
     this.fetching.playedRequests = false;
+
+    console.log(this.requestQueue);
   }
 
   sortByDateField(list: any[], property: string, asc: boolean) {
@@ -108,9 +116,30 @@ export class BotService {
     });
   }
 
-  refreshData() {
-    this.getAllRequests();
-    this.getPolls();
+  refreshData(table?: Tables) {
+    switch (table) {
+      case Tables.requests:
+        this.getAllRequests();
+        break;
+      case Tables.streamer_polls:
+      case Tables.streamer_polls_requests:
+      case Tables.streamer_polls_votes:
+        this.getPolls();
+        break;
+      default:
+        this.getAllRequests();
+        this.getPolls();
+    }
+  }
+
+  canRequest(userRequests): boolean {
+    if (this.streamerSettings) {
+      return (
+        this.streamerSettings.requestsPerUser > userRequests &&
+        this.streamerSettings.requestQueueLimit > this.requestQueue.length
+      );
+    }
+    return false;
   }
 
   getStreamerSettings() {
@@ -123,7 +152,7 @@ export class BotService {
         if (streamerSettings.length) {
           this.streamerSettings = streamerSettings[0];
           this.gotSettings$.next();
-          this.refreshData();
+          this.refreshData(Tables.streamer_settings);
         } else {
           this.message = 'Initializing Settings For New Streamer!';
           const streamerSettings = new StreamerSettings({
@@ -134,7 +163,7 @@ export class BotService {
             setTimeout(() => {
               this.message = 'Fetching Request Lists';
               this.gotSettings$.next();
-              this.refreshData();
+              this.refreshData(Tables.streamer_settings);
             }, 1000);
           });
         }
@@ -194,8 +223,28 @@ export class BotService {
     const targetRequest: Request = this.menuTarget;
     this.requestService.delete(targetRequest.id).subscribe(() => {
       console.log('Deleted Request!');
-      this.refreshData();
+      this.refreshData(Tables.requests);
     });
+  }
+
+  toggleLike(request: Request, user: User) {
+    this.liking = request.id;
+    const match = request.likes.filter(l => l.user.id === user.id);
+    if (match.length) {
+      // exists, so to toggle, delete it
+      this.likesService.delete(match[0].id).subscribe(() => {
+        console.log('deleted like');
+        this.liking = null;
+      });
+    } else {
+      // add one
+      console.log(user);
+      const like = new Like({ request, user });
+      this.likesService.create(like).subscribe(like => {
+        console.log('created', like);
+        this.liking = null;
+      });
+    }
   }
 
   play(request: Request) {
@@ -301,7 +350,7 @@ export class BotService {
     });
 
     zip(...changes).subscribe(d => {
-      this.refreshData();
+      this.refreshData(Tables.streamer_polls);
     });
   }
 
@@ -368,7 +417,7 @@ export class BotService {
         changes.push(this.streamerPollsRequestsService.create(pollRequest));
       });
       zip(...changes).subscribe(d => {
-        this.refreshData();
+        this.refreshData(Tables.streamer_polls);
       });
     });
   }

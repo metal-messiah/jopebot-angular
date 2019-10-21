@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { RestService } from './rest.service';
 import { CrudService } from '../../interfaces/crud-service';
 import { StreamerSettings } from 'app/models/streamer-settings';
-import { tables } from 'app/enums/tables';
+import { Tables } from 'app/enums/tables';
 import { StreamerPoll } from 'app/models/streamer-poll';
 import { StreamerPollResult } from 'app/models/streamer-poll-result';
 
@@ -13,7 +13,7 @@ import { StreamerPollResult } from 'app/models/streamer-poll-result';
   providedIn: 'root'
 })
 export class StreamerPollsService extends CrudService<StreamerPoll> {
-  table: tables = tables.streamer_polls;
+  table: Tables = Tables.streamer_polls;
   endpoint = `/api/${this.table}`;
 
   constructor(protected http: HttpClient, protected rest: RestService) {

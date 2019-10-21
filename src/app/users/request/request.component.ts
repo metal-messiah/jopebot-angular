@@ -155,13 +155,15 @@ export class RequestComponent implements OnInit {
   }
 
   shouldDisableNewRequest(): boolean {
-    return this.submitting || (!this.selectedSong && !this.customMessageControl.valid && !this.linkControl.valid);
+    return (
+      !this.botService.canRequest(this.userRequests) ||
+      this.submitting ||
+      (!this.selectedSong && !this.customMessageControl.valid && !this.linkControl.valid)
+    );
   }
 
   submitNewRequest() {
-    console.log(this.botService.streamerSettings.requestsPerUser, this.userRequests, this.requestIdParam);
-    console.log(this.streamerIdParam);
-    if (this.botService.streamerSettings.requestsPerUser > this.userRequests || this.requestIdParam) {
+    if (this.botService.canRequest(this.userRequests) || this.requestIdParam) {
       this.submitting = true;
       const song: string = this.selectedSong ? JSON.stringify(this.selectedSong) : null;
       const link: URL = this.linkControl.valid ? this.linkControl.value : null;

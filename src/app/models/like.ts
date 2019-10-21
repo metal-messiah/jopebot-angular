@@ -1,32 +1,23 @@
 import { Entity } from './entity';
 import { User } from './user';
-import { Like } from './like';
+import { Request } from './request';
 
-export class Request implements Entity {
+export class Like implements Entity {
   id?: number;
   createdAt?: Date;
   createdBy?: User;
   updatedAt?: Date;
   user?: User;
-  streamer?: User;
-  self?: boolean;
+  request?: Request;
 
-  likes?: Like[];
-
-  message?: string;
-  song?: string;
-  link?: URL;
-
-  played?: Date;
-
-  constructor(obj: Request) {
+  constructor(obj: Like) {
     Object.assign(this, obj);
 
     if (obj.createdBy) {
       this.createdBy = new User(obj.createdBy);
     }
-    if (obj.streamer) {
-      this.streamer = new User(obj.streamer);
+    if (obj.request) {
+      this.request = new Request(obj.request);
     }
     if (obj.user) {
       this.user = new User(obj.user);

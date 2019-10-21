@@ -20,6 +20,7 @@ import { StorageService } from './services/storage.service';
 import { StreamerPollsService } from './services/streamer-polls.service';
 import { StreamerPollsRequestsService } from './services/streamer-polls-requests.service';
 import { StreamerPollsVotesService } from './services/streamer-polls-votes.service';
+import { LikesService } from './services/likes.service';
 
 @NgModule({
   imports: [CommonModule],
@@ -44,6 +45,7 @@ import { StreamerPollsVotesService } from './services/streamer-polls-votes.servi
     StreamerPollsService,
     StreamerPollsRequestsService,
     StreamerPollsVotesService,
+    LikesService,
     CanDeactivateGuard
   ]
 })

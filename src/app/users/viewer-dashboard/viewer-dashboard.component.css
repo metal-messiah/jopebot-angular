@@ -3,11 +3,10 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: "Audiowide", cursive;
+  font-family: 'Audiowide', cursive;
   color: white;
   text-align: center;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-    1px 1px 0 #000;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
   max-width: calc(100% - 20px);
   margin-left: 10px;
   margin-right: 10px;
@@ -44,13 +43,13 @@ h5 {
   /* display: flex;
   align-items: center;
   justify-content: space-between; */
-  background-image: url("assets/images/background-texture.png");
+  background-image: url('assets/images/background-texture.png');
   background-blend-mode: color-burn;
   box-shadow: black 0px 0px 5px;
   margin: 10px;
   padding: 10px;
   text-align: center;
-  font-family: "Audiowide", cursive;
+  font-family: 'Audiowide', cursive;
 }
 
 .item-card-row > button:hover:not([disabled]) {
@@ -100,12 +99,12 @@ h5 {
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 99999;
+  z-index: 2;
 
   background: #1f1f1f;
   display: flex;
   align-items: center;
-  background-image: url("assets/images/background-texture.png");
+  background-image: url('assets/images/background-texture.png');
   background-blend-mode: color-burn;
   box-shadow: black 0px 0px 5px;
   justify-content: space-evenly;

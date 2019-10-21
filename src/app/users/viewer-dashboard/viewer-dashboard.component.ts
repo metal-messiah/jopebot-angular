@@ -16,7 +16,7 @@ import eh from '../../interfaces/error-handler';
 import { trigger, transition, useAnimation } from '@angular/animations';
 import { zoomIn } from 'ng-animate';
 import { StreamerSong } from 'app/models/streamer-song';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatSnackBar, MatSnackBarConfig } from '@angular/material';
 import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
 import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog.component';
 import { SocketService } from 'app/core/services/socket.service';
@@ -52,6 +52,11 @@ export class ViewerDashboardComponent implements OnInit {
   streamerSettings: StreamerSettings = null;
   userRequests = 0;
 
+  snacks = [];
+  private snackConfig: MatSnackBarConfig = {
+    duration: 2000
+  };
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -62,7 +67,8 @@ export class ViewerDashboardComponent implements OnInit {
     private dialog: MatDialog,
     private socketService: SocketService,
     private streamerSettingsService: StreamerSettingsService,
-    private botService: BotService
+    private botService: BotService,
+    private snackbar: MatSnackBar
   ) {}
 
   async ngOnInit() {
@@ -75,18 +81,6 @@ export class ViewerDashboardComponent implements OnInit {
         this.refreshData();
       }
     });
-
-    // subscribe to socket refresh!
-    // this.socketService.refreshDatasets$.subscribe(() => {
-    //   this.refreshData();
-    // });
-  }
-
-  canRequest(): boolean {
-    if (this.botService.streamerSettings) {
-      return this.botService.streamerSettings.requestsPerUser > this.userRequests;
-    }
-    return false;
   }
 
   refreshData() {
@@ -94,8 +88,6 @@ export class ViewerDashboardComponent implements OnInit {
   }
 
   getCounts() {
-    console.log('get counts');
-
     this.requestService
       .count({
         user_id: this.authService.currentUser.id,
@@ -104,8 +96,31 @@ export class ViewerDashboardComponent implements OnInit {
       })
       .subscribe(count => {
         this.userRequests = count;
-        console.log(count);
+        if (!this.botService.canRequest(this.userRequests)) {
+          console.log('cant request');
+          if (this.botService.streamerSettings.requestsPerUser <= this.userRequests) {
+            console.log('reached limit');
+            this.snacks.push('You have reached your request limit');
+          }
+          if (this.botService.streamerSettings.requestQueueLimit <= this.botService.requestQueue.length) {
+            console.log('full');
+            this.snacks.push('The request list is full');
+          }
+          this.handleSnackbar();
+        }
       });
+  }
+
+  handleSnackbar() {
+    const msg = this.snacks.length ? this.snacks.shift() : null;
+    if (msg) {
+      this.snackbar
+        .open(msg, null, this.snackConfig)
+        .afterDismissed()
+        .subscribe(() => {
+          this.handleSnackbar();
+        });
+    }
   }
 
   async getUserFromId(id: string | number) {

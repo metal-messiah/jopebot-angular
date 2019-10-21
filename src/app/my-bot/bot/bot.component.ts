@@ -20,10 +20,6 @@ export class BotComponent implements OnInit {
     this.botService.use(this.authService.currentUser);
   }
 
-  refreshData() {
-    this.botService.getAllRequests();
-  }
-
   scrollTo(elemId: string) {
     const elem = document.getElementById(elemId);
     elem.scrollIntoView({ behavior: 'smooth' });

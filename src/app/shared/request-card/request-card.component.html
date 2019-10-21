@@ -27,6 +27,16 @@
         </div>
         <button
           mat-icon-button
+          [color]="getLikeColor(request)"
+          (click)="toggleLike(request)"
+          matTooltip="Like Request"
+          matTooltipPosition="left"
+        >
+          <i *ngIf="request.id !== botService.liking" class="fas fa-heart"></i>
+          <i *ngIf="request.id === botService.liking" class="fas fa-spinner fa-pulse"></i>
+        </button>
+        <button
+          mat-icon-button
           color="warn"
           [disabled]="!request.song"
           (click)="botService.showSongInfo(request.song)"

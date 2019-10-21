@@ -19,6 +19,8 @@ export class RequestCardComponent implements OnInit {
 
   view: ParentComponent;
 
+  liking = false;
+
   constructor(
     private botService: BotService,
     private dialog: MatDialog,
@@ -71,6 +73,16 @@ export class RequestCardComponent implements OnInit {
     return this.view === ParentComponent.BotComponent && this.type === RequestCardType.REQUEST_QUEUE;
   }
 
+  getLikeColor(request: Request) {
+    if (request.likes.filter(l => l.user.id === this.authService.currentUser.id).length) {
+      return 'primary';
+    }
+    return 'warn';
+  }
+
+  toggleLike(request: Request) {
+    this.botService.toggleLike(request, this.authService.currentUser);
+  }
   shouldDisableMenu(request: Request) {
     if (this.view === ParentComponent.ViewerDashboardComponent) {
       return request.user.id !== this.authService.currentUser.id;

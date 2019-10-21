@@ -1,10 +1,7 @@
 import { RestService } from "../core/services/rest.service";
 import { HttpClient } from "@angular/common/http";
-import { Entity } from "../models/entity";
 import { Observable } from "rxjs";
 import { map } from "rxjs/internal/operators";
-
-import { tables } from "../enums/tables";
 
 export abstract class CrudService<T> {
   protected abstract endpoint;

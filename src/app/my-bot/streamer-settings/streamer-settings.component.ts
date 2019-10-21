@@ -42,46 +42,6 @@ export class StreamerSettingsComponent implements OnInit {
         value: this.botService.streamerSettings.allowChatRequests,
         disabled: true
       }),
-      botVoiceName: new FormControl({
-        value: this.botService.streamerSettings.botVoiceName,
-        disabled: true
-      }),
-      botVoiceOnRequest: new FormControl({
-        value: this.botService.streamerSettings.botVoiceOnRequest,
-        disabled: true
-      }),
-      botVoicePitch: new FormControl({
-        value: this.botService.streamerSettings.botVoicePitch,
-        disabled: true
-      }),
-      botVoiceRate: new FormControl({
-        value: this.botService.streamerSettings.botVoiceRate,
-        disabled: true
-      }),
-      botVoiceVolume: new FormControl({
-        value: this.botService.streamerSettings.botVoiceVolume,
-        disabled: true
-      }),
-      customInfoMessage: new FormControl({
-        value: this.botService.streamerSettings.customInfoMessage,
-        disabled: true
-      }),
-      hideChatMessages: new FormControl({
-        value: this.botService.streamerSettings.hideChatMessages,
-        disabled: true
-      }),
-      infoMessageChats: new FormControl({
-        value: this.botService.streamerSettings.infoMessageChats,
-        disabled: true
-      }),
-      infoMessageSeconds: new FormControl({
-        value: this.botService.streamerSettings.infoMessageSeconds,
-        disabled: true
-      }),
-      profanityFilter: new FormControl({
-        value: this.botService.streamerSettings.profanityFilter,
-        disabled: true
-      }),
       requestAlias: new FormControl({
         value: this.botService.streamerSettings.requestAlias,
         disabled: true
@@ -92,9 +52,19 @@ export class StreamerSettingsComponent implements OnInit {
           disabled: false
         },
         [Validators.required, Validators.min(1), Validators.pattern(/^-?[0-9][^\.]*$/)]
-      )
+      ),
+      requestQueueLimit: new FormControl(
+        {
+          value: this.botService.streamerSettings.requestQueueLimit,
+          disabled: false
+        },
+        [Validators.required, Validators.min(1), Validators.pattern(/^-?[0-9][^\.]*$/)]
+      ),
+      isPaused: new FormControl({
+        value: this.botService.streamerSettings.isPaused,
+        disabled: false
+      })
     });
-    // });
   }
 
   onSubmit() {

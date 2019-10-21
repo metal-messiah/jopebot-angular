@@ -52,6 +52,11 @@ mat-form-field {
   max-width: 100%;
 }
 
+.mat-snack-bar-container {
+  color: #ffab40 !important;
+  background-color: black !important;
+}
+
 .box {
   display: flex;
   flex-flow: column;

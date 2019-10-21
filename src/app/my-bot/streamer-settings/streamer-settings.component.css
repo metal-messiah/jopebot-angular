@@ -9,6 +9,8 @@ form {
   min-height: calc(100vh - 175px);
   border-radius: 10px;
   position: relative;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 mat-form-field {
@@ -24,10 +26,11 @@ mat-spinner {
 }
 
 form > button {
-  position: fixed;
+  position: absolute;
   right: 20px;
+  top: 20px;
 }
 
 .form-container {
-  margin-top: 50px;
+  margin-bottom: 50px;
 }

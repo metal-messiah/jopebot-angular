@@ -1,4 +1,4 @@
-export enum tables {
+export enum Tables {
   requests = 'requests',
   streamer_settings = 'streamer-settings',
   streamer_songs = 'streamer-songs',
@@ -6,5 +6,6 @@ export enum tables {
   users = 'users',
   streamer_polls = 'streamer-polls',
   streamer_polls_votes = 'streamer-polls-votes',
-  streamer_polls_requests = 'streamer-polls-requests'
+  streamer_polls_requests = 'streamer-polls-requests',
+  likes = 'likes'
 }

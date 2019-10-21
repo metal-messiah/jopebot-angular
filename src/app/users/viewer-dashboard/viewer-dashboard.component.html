@@ -11,7 +11,13 @@
       <app-request-card [type]="requestCardTypes.PLAYED_REQUESTS" [requests]="botService.playedRequests">
       </app-request-card>
       <app-poll-card [polls]="botService.polls"> </app-poll-card>
-      <button [disabled]="!canRequest()" (click)="newRequest()" id="new-request-button" mat-fab color="warn">
+      <button
+        [disabled]="!botService.canRequest(userRequests)"
+        (click)="newRequest()"
+        id="new-request-button"
+        mat-fab
+        color="warn"
+      >
         <i class="fas fa-plus-circle"></i>
       </button>
       <mat-toolbar class="bottom-bar">

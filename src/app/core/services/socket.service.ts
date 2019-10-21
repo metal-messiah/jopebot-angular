@@ -1,12 +1,13 @@
-import io from "socket.io-client";
-import { Observable, of, Subject, Subscription } from "rxjs";
-import { HttpClient } from "@angular/common/http";
-import { RestService } from "./rest.service";
+import io from 'socket.io-client';
+import { Observable, of, Subject, Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { RestService } from './rest.service';
+import { Tables } from 'app/enums/tables';
 
 export class SocketService {
   io: io;
 
-  refreshDatasets$: Subject<void> = new Subject<void>();
+  refreshDatasets$: Subject<Tables> = new Subject<Tables>();
 
   constructor(private http: HttpClient, private rest: RestService) {
     this.io = io({ autoConnect: false });
@@ -14,16 +15,16 @@ export class SocketService {
 
   connect(userId) {
     this.io = io(`http://localhost:3001/${userId}`);
-    this.io.on("connect", function(data) {
-      console.log("connected to room", userId);
+    this.io.on('connect', function(data) {
+      console.log('connected to room', userId);
     });
-    this.io.on("INFO", function(data) {
+    this.io.on('INFO', function(data) {
       console.log(data);
     });
-    this.io.on("REFRESH", () => {
-      this.refreshDatasets$.next();
+    this.io.on('REFRESH', (table: Tables) => {
+      this.refreshDatasets$.next(table);
     });
-    this.io.on("disconnect", function(data) {
+    this.io.on('disconnect', function(data) {
       console.log(data);
     });
   }

@@ -1,4 +1,4 @@
-<h1 *ngIf="userFromId">{{ userFromId.displayName }}</h1>
+<h2 style="margin-bottom: 5px;" *ngIf="botService.user">{{ botService.user.displayName }}</h2>
 <div class="inner-content">
   <div>
     <div class="loading-container">
@@ -11,13 +11,7 @@
       <app-request-card [type]="requestCardTypes.PLAYED_REQUESTS" [requests]="botService.playedRequests">
       </app-request-card>
       <app-poll-card [polls]="botService.polls"> </app-poll-card>
-      <button
-        [disabled]="!botService.canRequest(userRequests)"
-        (click)="newRequest()"
-        id="new-request-button"
-        mat-fab
-        color="warn"
-      >
+      <button [disabled]="!botService.canRequest" (click)="newRequest()" id="new-request-button" mat-fab color="warn">
         <i class="fas fa-plus-circle"></i>
       </button>
       <mat-toolbar class="bottom-bar">
@@ -36,6 +30,9 @@
           matTooltipPosition="above"
         >
           <i class="fas fa-clipboard-check"></i>
+        </button>
+        <button mat-flat-button (click)="scrollTo('polls')" matTooltip="Polls" matTooltipPosition="above">
+          <i class="fas fa-poll"></i>
         </button>
       </mat-toolbar>
     </div>

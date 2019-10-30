@@ -14,14 +14,15 @@ export class SocketService {
   }
 
   connect(userId) {
-    this.io = io(`http://localhost:3001/${userId}`);
+    this.io = io(`${this.rest.getHost()}/${userId}`);
     this.io.on('connect', function(data) {
       console.log('connected to room', userId);
     });
     this.io.on('INFO', function(data) {
       console.log(data);
     });
-    this.io.on('REFRESH', (table: Tables) => {
+    this.io.on('REFRESH', table => {
+      table = table.replace(/_/g, '-');
       this.refreshDatasets$.next(table);
     });
     this.io.on('disconnect', function(data) {

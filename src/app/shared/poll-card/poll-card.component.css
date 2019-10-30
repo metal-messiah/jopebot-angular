@@ -144,6 +144,30 @@ button {
   margin: 10px;
   padding-bottom: 10px;
   padding-top: 5px;
+
+  height: calc(100vh - 200px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* @media only screen and (max-width: 1704px) and (min-width: 865px) {
+  .module {
+    height: calc(50vh - 125px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+} */
+
+@media only screen and (max-width: 1704px) {
+  .module {
+    height: calc(100vh - 250px);
+  }
+}
+
+@media only screen and (max-width: 864px) {
+  .module {
+    height: unset;
+  }
 }
 
 .bottom-bar {

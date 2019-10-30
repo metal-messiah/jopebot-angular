@@ -3,100 +3,102 @@
 
 <mat-spinner *ngIf="fetching.songs" color="accent"></mat-spinner>
 
-<mat-accordion *ngIf="!fetching.songs">
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Personalize
-      </mat-panel-title>
-      <mat-panel-description>
-        Add a Custom Message
-      </mat-panel-description>
-    </mat-expansion-panel-header>
+<div class="accordion-wrapper">
+  <mat-accordion *ngIf="!fetching.songs">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Personalize
+        </mat-panel-title>
+        <mat-panel-description>
+          Add a Custom Message
+        </mat-panel-description>
+      </mat-expansion-panel-header>
 
-    <div class="input-container">
-      <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl" style="width: 100%;">
-        <input matInput type="text" placeholder="Custom Message" [formControl]="customMessageControl" />
-      </mat-form-field>
-    </div>
-  </mat-expansion-panel>
-
-  <mat-expansion-panel *ngIf="songs">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Search
-      </mat-panel-title>
-      <mat-panel-description>
-        Lists of Files
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <div class="input-container">
-      <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl">
-        <input matInput placeholder="Search" [formControl]="textControl" />
-        <mat-hint *ngIf="display.length">{{ display.length | number }} Matching Records</mat-hint>
-      </mat-form-field>
-
-      <mat-form-field class="fields-form" color="accent" *ngIf="fieldsControl">
-        <mat-select (blur)="onBlur()" (focus)="onFocus()" [formControl]="fieldsControl" multiple>
-          <mat-select-trigger>
-            {{ 'Showing ' + fieldsControl.value.length + '/' + dataFields.length + ' Fields' }}
-          </mat-select-trigger>
-          <mat-option *ngFor="let field of dataFields" [value]="field" color="accent" checked>
-            {{ field }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="fields" *ngIf="fieldsControl && !selectIsOpen">
-      <div *ngFor="let field of fieldsControl.value" [ngStyle]="{ maxWidth: getRowWidth() }">
-        {{ field }}
+      <div class="input-container">
+        <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl" style="width: 100%;">
+          <input matInput type="text" placeholder="Custom Message" [formControl]="customMessageControl" />
+        </mat-form-field>
       </div>
-    </div>
-    <cdk-virtual-scroll-viewport
-      itemSize="10"
-      *ngIf="fieldsControl && !selectIsOpen && display.length > 0"
-      class="songs-viewport"
-    >
-      <div
-        class="songs-values"
-        [ngClass]="{ 'alternate-color': i % 2, highlighted: isSong(song) }"
-        *cdkVirtualFor="let song of display; let i = index"
-        (click)="onSongClick(song)"
-      >
+    </mat-expansion-panel>
+
+    <mat-expansion-panel *ngIf="songs">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Search
+        </mat-panel-title>
+        <mat-panel-description>
+          Lists of Files
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="input-container">
+        <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl">
+          <input matInput placeholder="Search" [formControl]="textControl" />
+          <mat-hint *ngIf="display.length">{{ display.length | number }} Matching Records</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field class="fields-form" color="accent" *ngIf="fieldsControl">
+          <mat-select (blur)="onBlur()" (focus)="onFocus()" [formControl]="fieldsControl" multiple>
+            <mat-select-trigger>
+              {{ 'Showing ' + fieldsControl.value.length + '/' + dataFields.length + ' Fields' }}
+            </mat-select-trigger>
+            <mat-option *ngFor="let field of dataFields" [value]="field" color="accent" checked>
+              {{ field }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="fields" *ngIf="fieldsControl && !selectIsOpen">
         <div *ngFor="let field of fieldsControl.value" [ngStyle]="{ maxWidth: getRowWidth() }">
-          {{ song[field] }}
+          {{ field }}
         </div>
       </div>
-    </cdk-virtual-scroll-viewport>
-  </mat-expansion-panel>
+      <cdk-virtual-scroll-viewport
+        itemSize="10"
+        *ngIf="fieldsControl && !selectIsOpen && display.length > 0"
+        class="songs-viewport"
+      >
+        <div
+          class="songs-values"
+          [ngClass]="{ 'alternate-color': i % 2, highlighted: isSong(song) }"
+          *cdkVirtualFor="let song of display; let i = index"
+          (click)="onSongClick(song)"
+        >
+          <div *ngFor="let field of fieldsControl.value" [ngStyle]="{ maxWidth: getRowWidth() }">
+            {{ song[field] }}
+          </div>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </mat-expansion-panel>
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Connect
-      </mat-panel-title>
-      <mat-panel-description>
-        Attach a Link
-      </mat-panel-description>
-    </mat-expansion-panel-header>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Connect
+        </mat-panel-title>
+        <mat-panel-description>
+          Attach a Link
+        </mat-panel-description>
+      </mat-expansion-panel-header>
 
-    <div class="input-container">
-      <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl" style="width: 100%;">
-        <input matInput type="text" placeholder="External Link" [formControl]="linkControl" />
-        <mat-error *ngIf="linkControl.invalid">Must Be A Valid Link</mat-error>
-      </mat-form-field>
-    </div>
-  </mat-expansion-panel>
-</mat-accordion>
-<button
-  *ngIf="!fetching.songs"
-  class="submit-request"
-  mat-raised-button
-  color="warn"
-  [disabled]="shouldDisableNewRequest()"
-  (click)="submitNewRequest()"
->
-  Save Request <i *ngIf="submitting" class="fas fa-spinner fa-pulse"></i>
-</button>
+      <div class="input-container">
+        <mat-form-field class="text-form" color="accent" *ngIf="textControl && fieldsControl" style="width: 100%;">
+          <input matInput type="text" placeholder="External Link" [formControl]="linkControl" />
+          <mat-error *ngIf="linkControl.invalid">Must Be A Valid Link</mat-error>
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+  <button
+    *ngIf="!fetching.songs"
+    class="submit-request"
+    mat-raised-button
+    color="warn"
+    [disabled]="shouldDisableNewRequest()"
+    (click)="submitNewRequest()"
+  >
+    Save Request <i *ngIf="submitting" class="fas fa-spinner fa-pulse"></i>
+  </button>
+</div>

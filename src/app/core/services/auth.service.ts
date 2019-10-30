@@ -16,11 +16,8 @@ export class AuthService {
   private _currentUser: User;
 
   constructor(private http: HttpClient, private rest: RestService, private storageService: StorageService) {
-    // this.storageService.getOne("currentUser").subscribe((user: User) => {
-    //   this.currentUser = user;
-    // });
-
     this.fetchCurrentUserFromDB().subscribe((user: User) => {
+      console.log(user);
       if (user) {
         this.currentUser = user;
       }

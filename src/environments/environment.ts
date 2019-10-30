@@ -6,7 +6,7 @@ declare var require: any;
 
 export const environment = {
   production: false,
-  envName: "dev",
-  WEB_SERVICE_HOST: "http://localhost:3001",
-  VERSION: require("../../package.json").version
+  envName: 'dev',
+  WEB_SERVICE_HOST: 'https://jopebot-web-beta.herokuapp.com',
+  VERSION: require('../../package.json').version
 };

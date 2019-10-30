@@ -21,6 +21,10 @@ import { StreamerPollsService } from './services/streamer-polls.service';
 import { StreamerPollsRequestsService } from './services/streamer-polls-requests.service';
 import { StreamerPollsVotesService } from './services/streamer-polls-votes.service';
 import { LikesService } from './services/likes.service';
+import { SnackbarQueueService } from './services/snackbar-queue.service';
+import { ChatService } from './services/chat.service';
+import { RoleGuard } from './services/role.guard';
+import { UtilitiesService } from './services/utilities.service';
 
 @NgModule({
   imports: [CommonModule],
@@ -34,8 +38,10 @@ import { LikesService } from './services/likes.service';
     UserGuard,
     OwnedGuard,
     SocketGuard,
+    RoleGuard,
     SocketService,
     StorageService,
+    UtilitiesService,
     RestService,
     UserService,
     RequestService,
@@ -46,6 +52,8 @@ import { LikesService } from './services/likes.service';
     StreamerPollsRequestsService,
     StreamerPollsVotesService,
     LikesService,
+    SnackbarQueueService,
+    ChatService,
     CanDeactivateGuard
   ]
 })

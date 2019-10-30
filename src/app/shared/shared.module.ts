@@ -13,22 +13,27 @@ import { PollCardComponent } from './poll-card/poll-card.component';
 import { ChartsModule } from 'ng2-charts';
 import { SelectDialogComponent } from './select-dialog/select-dialog.component';
 import { InputDialogComponent } from './input-dialog/input-dialog.component';
+import { ShortcutsCardComponent } from './shortcuts-card/shortcuts-card.component';
+import { NotAuthorizedComponent } from './not-authorized/not-authorized.component';
 
 @NgModule({
   imports: [CommonModule, CustomMaterialModule, FormsModule, ReactiveFormsModule, ChartsModule],
   declarations: [
     CallbackComponent,
     PathNotFoundComponent,
+    NotAuthorizedComponent,
     ConfirmDialogComponent,
     DisplayDialogComponent,
     SelectDialogComponent,
     InputDialogComponent,
     RequestCardComponent,
-    PollCardComponent
+    PollCardComponent,
+    ShortcutsCardComponent
   ],
   exports: [
     CallbackComponent,
     PathNotFoundComponent,
+    NotAuthorizedComponent,
     ConfirmDialogComponent,
     DisplayDialogComponent,
     SelectDialogComponent,
@@ -38,7 +43,8 @@ import { InputDialogComponent } from './input-dialog/input-dialog.component';
     FormsModule,
     ReactiveFormsModule,
     RequestCardComponent,
-    PollCardComponent
+    PollCardComponent,
+    ShortcutsCardComponent
   ],
   entryComponents: [ConfirmDialogComponent, DisplayDialogComponent, SelectDialogComponent, InputDialogComponent]
 })

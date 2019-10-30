@@ -3,7 +3,7 @@ import { StreamerSettingsService } from 'app/core/services/streamer-settings.ser
 import { AuthService } from 'app/core/services/auth.service';
 import { StreamerSettings } from 'app/models/streamer-settings';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { BotService } from 'app/core/services/bot.service';
 
 @Component({
@@ -12,6 +12,7 @@ import { BotService } from 'app/core/services/bot.service';
   styleUrls: ['./streamer-settings.component.css']
 })
 export class StreamerSettingsComponent implements OnInit {
+  streamerIdParam: number | string;
   saving = false;
   settings: StreamerSettings;
 
@@ -21,12 +22,11 @@ export class StreamerSettingsComponent implements OnInit {
     private authService: AuthService,
     private streamerSettingsService: StreamerSettingsService,
     private router: Router,
-    private botService: BotService
+    private botService: BotService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    this.botService.use(this.authService.currentUser);
-
     this.botService.gotSettings$.subscribe(() => {
       this.setForm();
     });
@@ -75,7 +75,7 @@ export class StreamerSettingsComponent implements OnInit {
       this.streamerSettingsService.update(newSettings).subscribe(
         (updated: StreamerSettings) => {
           this.saving = false;
-          this.router.navigate(['/bot']);
+          this.router.navigate(['../'], { relativeTo: this.route });
         },
         err => {
           console.log(err);

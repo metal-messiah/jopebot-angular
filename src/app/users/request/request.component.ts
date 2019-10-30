@@ -39,9 +39,6 @@ export class RequestComponent implements OnInit {
   textControl: FormControl;
   customMessageControl: FormControl;
   linkControl: FormControl;
-
-  userRequests: number;
-
   fuse: Fuse<any>;
 
   constructor(
@@ -78,18 +75,7 @@ export class RequestComponent implements OnInit {
     ]);
   }
 
-  updateCounts() {
-    console.log('update counts!');
-    this.requestService
-      .count({
-        user_id: this.authService.currentUser.id,
-        streamer_id: this.streamerIdParam,
-        'played is': null
-      })
-      .subscribe(count => {
-        this.userRequests = count;
-      });
-  }
+  updateCounts() {}
 
   populateForms() {
     this.requestService.getOneById(this.requestIdParam).subscribe((request: Request) => {
@@ -156,14 +142,14 @@ export class RequestComponent implements OnInit {
 
   shouldDisableNewRequest(): boolean {
     return (
-      !this.botService.canRequest(this.userRequests) ||
+      !this.botService.canRequest ||
       this.submitting ||
       (!this.selectedSong && !this.customMessageControl.valid && !this.linkControl.valid)
     );
   }
 
   submitNewRequest() {
-    if (this.botService.canRequest(this.userRequests) || this.requestIdParam) {
+    if (this.botService.canRequest || this.requestIdParam) {
       this.submitting = true;
       const song: string = this.selectedSong ? JSON.stringify(this.selectedSong) : null;
       const link: URL = this.linkControl.valid ? this.linkControl.value : null;

@@ -25,6 +25,10 @@ h5 {
   text-overflow: ellipsis;
 }
 
+button {
+  font-family: 'Audiowide', cursive;
+}
+
 .loading-container {
   display: flex;
   align-items: center;
@@ -41,6 +45,21 @@ h5 {
   align-items: flex-start;
   flex-wrap: wrap;
   padding-bottom: 100px;
+}
+
+.vote-button {
+  /* background: #333; */
+  /* background-image: url('assets/images/background-texture.png');
+  background-blend-mode: color-burn; */
+  /* box-shadow: black 0px 0px 5px; */
+}
+
+.vote-button:not([disabled]):hover {
+  background: #444;
+}
+
+.vote-icon {
+  color: white;
 }
 
 .item {
@@ -85,17 +104,25 @@ h5 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 0;
+  padding: 5px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: black;
+}
+
+.item-card-row > button {
+  width: 100%;
 }
 
 .item-card-title {
   font-size: large;
-  color: #ffab40;
-  max-width: calc(100% - 50px);
+  color: white;
   text-align: left;
   /* word-break: break-all; */
   text-overflow: ellipsis;
+  padding: 0 2px;
   overflow: hidden;
+  margin-right: 10px;
 }
 
 .item-card-logo {
@@ -106,55 +133,11 @@ h5 {
 }
 
 .item-card-date {
+  font-size: xx-small;
+}
+
+.item-card-status {
   font-size: x-small;
-}
-
-.item-card-now-playing {
-  text-align: center;
-  width: 100%;
-  color: black;
-  background: linear-gradient(270deg, #ffab40, #ff5722);
-  background-size: 600% 600%;
-
-  -webkit-animation: NowPlaying 10s ease infinite;
-  -moz-animation: NowPlaying 10s ease infinite;
-  animation: NowPlaying 10s ease infinite;
-
-  padding: 5px 0;
-}
-
-@-webkit-keyframes NowPlaying {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-@-moz-keyframes NowPlaying {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-@keyframes NowPlaying {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
 }
 
 .module {
@@ -169,8 +152,8 @@ h5 {
   overflow-y: auto;
   overflow-x: hidden;
 }
-
-/* @media only screen and (max-width: 1704px) and (min-width: 865px) {
+/* 
+@media only screen and (max-width: 1704px) and (min-width: 865px) {
   .module {
     height: calc(50vh - 125px);
     overflow-y: auto;
@@ -226,28 +209,4 @@ h5 {
 .bottom-bar > button:hover {
   background: #ffab40;
   color: black;
-  position: relative;
-}
-
-i[data-likes]::after {
-  content: attr(data-likes);
-  color: white;
-  position: absolute;
-  left: 0;
-  font-size: xx-small;
-  background: black;
-  width: 15px;
-  height: 15px;
-  line-height: 15px;
-  border-radius: 50%;
-}
-
-@media only screen and (min-width: 865px) {
-  .bottom-bar {
-    display: none;
-  }
-
-  #new-request-button {
-    bottom: 25px;
-  }
 }

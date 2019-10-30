@@ -1,16 +1,13 @@
-import { RestService } from "../core/services/rest.service";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { map } from "rxjs/internal/operators";
+import { RestService } from '../core/services/rest.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/internal/operators';
 
 export abstract class CrudService<T> {
   protected abstract endpoint;
   protected abstract table;
 
-  protected constructor(
-    protected http: HttpClient,
-    protected rest: RestService
-  ) {}
+  protected constructor(protected http: HttpClient, protected rest: RestService) {}
 
   protected abstract createEntityFromObj(entityObj): T;
 
@@ -34,14 +31,13 @@ export abstract class CrudService<T> {
       })
       .pipe(
         map(entityObj => {
-          if (entityObj) return this.createEntityFromObj(entityObj);
-          else return null;
+          if (entityObj) { return this.createEntityFromObj(entityObj); } else { return null; }
         })
       );
   }
 
   getAll(query?: object): Observable<T[]> {
-    let queryString = this.buildQueryStringFromObject(query);
+    const queryString = this.buildQueryStringFromObject(query);
 
     const url = this.rest.getHost() + this.endpoint + `${queryString}`;
     return this.http
@@ -51,14 +47,13 @@ export abstract class CrudService<T> {
       })
       .pipe(
         map(entityObj => {
-          if (entityObj) return entityObj.map(o => this.createEntityFromObj(o));
-          else return null;
+          if (entityObj) { return entityObj.map(o => this.createEntityFromObj(o)); } else { return null; }
         })
       );
   }
 
   update(updatedEntity: T): Observable<T> {
-    const url = this.rest.getHost() + this.endpoint + "/" + updatedEntity["id"];
+    const url = this.rest.getHost() + this.endpoint + '/' + updatedEntity['id'];
     return this.http
       .put<T>(url, updatedEntity, {
         headers: this.rest.getHeaders(),
@@ -66,8 +61,7 @@ export abstract class CrudService<T> {
       })
       .pipe(
         map(entityObj => {
-          if (entityObj) return this.createEntityFromObj(entityObj);
-          else return null;
+          if (entityObj) { return this.createEntityFromObj(entityObj); } else { return null; }
         })
       );
   }
@@ -97,13 +91,9 @@ export abstract class CrudService<T> {
   }
 
   count(query: object) {
-    let queryString = this.buildQueryStringFromObject(query);
+    const queryString = this.buildQueryStringFromObject(query);
 
-    const url =
-      this.rest.getHost() +
-      `/api/utilities/count/${this.table}` +
-      `${queryString}`;
-    console.log(url);
+    const url = this.rest.getHost() + `/api/utilities/count/${this.table}` + `${queryString}`;
     return this.http.get<number>(url, {
       headers: this.rest.getHeaders(),
       withCredentials: true
@@ -111,17 +101,15 @@ export abstract class CrudService<T> {
   }
 
   private buildQueryStringFromObject(query) {
-    let queryString = "";
+    let queryString = '';
     if (query) {
       queryString =
-        "?" +
+        '?' +
         Object.keys(query)
           .map(key => {
-            return (
-              encodeURIComponent(key) + "=" + encodeURIComponent(query[key])
-            );
+            return encodeURIComponent(key) + '=' + encodeURIComponent(query[key]);
           })
-          .join("&");
+          .join('&');
     }
     return queryString;
   }

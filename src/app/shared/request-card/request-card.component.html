@@ -1,13 +1,33 @@
 <div [id]="getId()" class="module" *ngIf="authService.currentUser">
-  <h3>{{ type }}</h3>
-  <mat-progress-bar *ngIf="botService.fetching.playedRequests" mode="indeterminate"></mat-progress-bar>
+  <h3>
+    {{ type }} <span *ngIf="requests.length">({{ requests.length | number }})</span>
+  </h3>
+  <mat-progress-bar *ngIf="botService.fetching.requests" mode="indeterminate"></mat-progress-bar>
   <div class="item-container">
+    <button
+      *ngIf="!botService.fetching.requests && canPlayRandom()"
+      mat-flat-button
+      color="primary"
+      (click)="botService.playRandom()"
+    >
+      <i class="fas fa-random"></i> Play Random</button
+    ><button
+      *ngIf="!botService.fetching.requests && canDeleteAll()"
+      mat-flat-button
+      color="warn"
+      (click)="deleteAllRequests()"
+    >
+      <i class="fas fa-trash"></i> Delete All
+    </button>
     <div
       class="item-card"
       *ngFor="let request of requests; let i = index"
-      [matBadge]="requests.length - i"
+      [matBadge]="getBadge(i)"
       matBadgePosition="before"
     >
+      <div class="item-card-row" *ngIf="shouldShowNowPlaying(i)">
+        <div class="item-card-now-playing">Now Playing</div>
+      </div>
       <div class="item-card-row">
         <div class="item-card-title">
           {{ botService.getRequestMessage(request) }}
@@ -26,13 +46,14 @@
           {{ getDate(request) | date: 'short' }}
         </div>
         <button
+          *ngIf="canLike()"
           mat-icon-button
           [color]="getLikeColor(request)"
           (click)="toggleLike(request)"
           matTooltip="Like Request"
           matTooltipPosition="left"
         >
-          <i *ngIf="request.id !== botService.liking" class="fas fa-heart"></i>
+          <i *ngIf="request.id !== botService.liking" [attr.data-likes]="request.likes.length" class="fas fa-heart"></i>
           <i *ngIf="request.id === botService.liking" class="fas fa-spinner fa-pulse"></i>
         </button>
         <button

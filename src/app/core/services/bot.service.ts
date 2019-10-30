@@ -5,7 +5,7 @@ import { Request } from 'app/models/request';
 import { StreamerSettingsService } from './streamer-settings.service';
 import { AuthService } from './auth.service';
 import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatSnackBar } from '@angular/material';
 import { DisplayDialogComponent } from 'app/shared/display-dialog/display-dialog.component';
 import { StreamerPoll } from 'app/models/streamer-poll';
 import { StreamerPollsService } from './streamer-polls.service';
@@ -22,6 +22,10 @@ import { InputDialogComponent } from 'app/shared/input-dialog/input-dialog.compo
 import { Tables } from 'app/enums/tables';
 import { LikesService } from './likes.service';
 import { Like } from 'app/models/like';
+import { SnackbarQueueService } from './snackbar-queue.service';
+import { StreamerSongsService } from './streamer-songs.service';
+import { StreamerSong } from 'app/models/streamer-song';
+import { UtilitiesService } from './utilities.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +36,7 @@ export class BotService {
   loading = true;
   message = '';
   streamerSettings: StreamerSettings;
-  fetching = { requestQueue: false, playedRequests: false, songs: false, polls: false };
+  fetching = { requests: false, songs: false, polls: false };
 
   playing = null;
 
@@ -52,6 +56,10 @@ export class BotService {
   deleting = false;
   liking = null;
 
+  userRequests: number;
+
+  streamerSongsText: string;
+
   constructor(
     private requestService: RequestService,
     private streamerSettingsService: StreamerSettingsService,
@@ -60,7 +68,11 @@ export class BotService {
     private userService: UserService,
     private socketService: SocketService,
     private streamerPollsRequestsService: StreamerPollsRequestsService,
-    private likesService: LikesService
+    private likesService: LikesService,
+    private snackbar: SnackbarQueueService,
+    private authService: AuthService,
+    private streamerSongsService: StreamerSongsService,
+    private utilitiesService: UtilitiesService
   ) {
     this.socketService.refreshDatasets$.subscribe((table: Tables) => {
       console.log('REFRESH FOR ', table);
@@ -74,6 +86,7 @@ export class BotService {
         this.userService.getOneById(user).subscribe((u: User) => {
           if (u) {
             console.log('Bot Service is now using user ', u.displayName);
+            this.reset();
             this.user = u;
             this.getStreamerSettings();
           }
@@ -81,16 +94,36 @@ export class BotService {
       }
     } else if (!this.user || this.user.id !== user.id) {
       console.log('Bot Service is now using user ', user.displayName);
+      this.reset();
       this.user = user;
       this.getStreamerSettings();
     }
   }
 
+  private reset() {
+    this.user = null;
+    this.loading = true;
+    this.message = '';
+    this.streamerSettings = null;
+    this.fetching = { requests: false, songs: false, polls: false };
+    this.playing = null;
+    this.requestQueue = [];
+    this.menuTarget = null;
+    this.playedRequests = [];
+    this.downloadWarning = `These links could point anywhere, are provided by random people on the internet, and are in no way affiliated with JopeBot.
+  
+  Do You Wish To Continue?`;
+    this.polls = [];
+    this.deleting = false;
+    this.liking = null;
+    this.userRequests = null;
+    this.streamerSongsText = null;
+  }
+
   async getAllRequests() {
     this.loading = false;
     this.message = '';
-    this.fetching.requestQueue = true;
-    this.fetching.playedRequests = true;
+    this.fetching.requests = true;
 
     const allRequests = await this.requestService.getAll({ streamer_id: this.user.id }).toPromise();
 
@@ -100,10 +133,7 @@ export class BotService {
     this.sortByDateField(this.requestQueue, 'createdAt', true);
     this.sortByDateField(this.playedRequests, 'played', false);
 
-    this.fetching.requestQueue = false;
-    this.fetching.playedRequests = false;
-
-    console.log(this.requestQueue);
+    this.fetching.requests = false;
   }
 
   sortByDateField(list: any[], property: string, asc: boolean) {
@@ -116,9 +146,20 @@ export class BotService {
     });
   }
 
+  sortByNumberField(list: any[], property: string, asc: boolean) {
+    list.sort((a, b) => {
+      if (asc) {
+        return Number(a[property]) - Number(b[property]);
+      } else {
+        return Number(b[property]) - Number(a[property]);
+      }
+    });
+  }
+
   refreshData(table?: Tables) {
     switch (table) {
       case Tables.requests:
+      case Tables.likes:
         this.getAllRequests();
         break;
       case Tables.streamer_polls:
@@ -126,48 +167,97 @@ export class BotService {
       case Tables.streamer_polls_votes:
         this.getPolls();
         break;
+      case Tables.streamer_settings:
+        this.getStreamerSettings();
+        break;
       default:
         this.getAllRequests();
         this.getPolls();
+        this.getCounts();
     }
   }
 
-  canRequest(userRequests): boolean {
+  get canRequest(): boolean {
     if (this.streamerSettings) {
       return (
-        this.streamerSettings.requestsPerUser > userRequests &&
+        this.streamerSettings.requestsPerUser > this.userRequests &&
         this.streamerSettings.requestQueueLimit > this.requestQueue.length
       );
     }
     return false;
   }
 
-  getStreamerSettings() {
-    this.message = 'Finding Streamer Settings...';
-    this.streamerSettingsService
+  getCounts() {
+    this.requestService
+      .count({
+        user_id: this.authService.currentUser.id,
+        streamer_id: this.user.id,
+        'played is': null
+      })
+      .subscribe(count => {
+        this.userRequests = count;
+        if (this.streamerSettings) {
+          if (this.streamerSettings.requestsPerUser <= this.userRequests) {
+            console.log('reached limit');
+            this.snackbar.add('You have reached your request limit');
+          }
+          if (this.streamerSettings.requestQueueLimit <= this.requestQueue.length) {
+            console.log('full');
+            this.snackbar.add('The request list is full');
+          }
+        }
+      });
+  }
+
+  getExistingSongs() {
+    console.log('get existing songs');
+    this.streamerSongsService
       .getAll({
         user_id: this.user.id
       })
-      .subscribe((streamerSettings: StreamerSettings[]) => {
-        if (streamerSettings.length) {
-          this.streamerSettings = streamerSettings[0];
-          this.gotSettings$.next();
-          this.refreshData(Tables.streamer_settings);
+      .subscribe((streamerSongs: StreamerSong[]) => {
+        if (streamerSongs.length) {
+          this.streamerSongsText = `Last Updated At ${streamerSongs[0].updatedAt.toLocaleString()}`;
+          this.loading = false;
         } else {
-          this.message = 'Initializing Settings For New Streamer!';
-          const streamerSettings = new StreamerSettings({
-            user: this.user
-          });
-          this.streamerSettingsService.create(streamerSettings).subscribe((ss: StreamerSettings) => {
-            this.message = 'Initialized With Default Settings!';
-            setTimeout(() => {
-              this.message = 'Fetching Request Lists';
-              this.gotSettings$.next();
-              this.refreshData(Tables.streamer_settings);
-            }, 1000);
-          });
+          this.streamerSongsText = `No File Found`;
         }
       });
+  }
+
+  getStreamerSettings() {
+    this.message = 'Finding Streamer Settings...';
+    setTimeout(() => {
+      this.streamerSettingsService
+        .getAll({
+          user_id: this.user.id
+        })
+        .subscribe((streamerSettings: StreamerSettings[]) => {
+          if (streamerSettings.length) {
+            console.log('got streamer settings');
+            this.streamerSettings = streamerSettings[0];
+            this.gotSettings$.next();
+            this.refreshData();
+            this.getExistingSongs();
+          } else {
+            console.log('initializing settings for new streamer');
+            this.message = 'Initializing Settings For New Streamer!';
+            const streamerSettings = new StreamerSettings({
+              user: this.user
+            });
+            this.streamerSettingsService.create(streamerSettings).subscribe((ss: StreamerSettings) => {
+              console.log('initia;ized with default settings');
+              this.message = 'Initialized With Default Settings!';
+              setTimeout(() => {
+                this.message = 'Fetching Request Lists';
+                this.gotSettings$.next();
+                this.refreshData();
+                this.getExistingSongs();
+              }, 1000);
+            });
+          }
+        });
+    }, 1000);
   }
 
   getPolls() {
@@ -219,11 +309,33 @@ export class BotService {
     }
   }
 
+  deleteAllRequests(dataset: Request[]) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Caution!!',
+          question: `This will delete all (${dataset.length.toLocaleString()}) request${
+            this.requestQueue.length === 1 ? '' : 's'
+          }!`
+        }
+      })
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const queue = dataset.map(r => this.requestService.delete(r.id));
+          zip(...queue).subscribe(d => {
+            this.snackbar.add(`Permanently Deleted ${d.length.toLocaleString()} Requests`, null, { duration: 3000 });
+          });
+        }
+      });
+  }
+
   deleteRequest() {
     const targetRequest: Request = this.menuTarget;
     this.requestService.delete(targetRequest.id).subscribe(() => {
       console.log('Deleted Request!');
       this.refreshData(Tables.requests);
+      this.snackbar.add(`Permanently Deleted ${this.getRequestMessage(targetRequest)}`, null, { duration: 3000 });
     });
   }
 
@@ -233,7 +345,6 @@ export class BotService {
     if (match.length) {
       // exists, so to toggle, delete it
       this.likesService.delete(match[0].id).subscribe(() => {
-        console.log('deleted like');
         this.liking = null;
       });
     } else {
@@ -241,10 +352,20 @@ export class BotService {
       console.log(user);
       const like = new Like({ request, user });
       this.likesService.create(like).subscribe(like => {
-        console.log('created', like);
         this.liking = null;
       });
     }
+  }
+
+  playRandom() {
+    const request = this.requestQueue[Math.floor(Math.random() * this.requestQueue.length)];
+    this.playing = request.id;
+    request.played = new Date();
+    this.requestService.update(request).subscribe((updatedRequest: Request) => {
+      console.log(updatedRequest);
+      this.playing = null;
+      this.snackbar.add(`Now Playing Random Request - ${this.getRequestMessage(request)}`, null, { duration: 3000 });
+    });
   }
 
   play(request: Request) {
@@ -253,6 +374,7 @@ export class BotService {
     this.requestService.update(request).subscribe((updatedRequest: Request) => {
       console.log(updatedRequest);
       this.playing = null;
+      this.snackbar.add(`Now Playing ${this.getRequestMessage(request)}`, null, { duration: 3000 });
     });
   }
 
@@ -262,13 +384,14 @@ export class BotService {
     this.requestService.update(request).subscribe((updatedRequest: Request) => {
       console.log(updatedRequest);
       this.playing = null;
+      this.snackbar.add(`Moved ${this.getRequestMessage(request)} Back to Request Queue`, null, { duration: 3000 });
     });
   }
 
   openLink(link: string) {
     this.dialog
       .open(ConfirmDialogComponent, {
-        data: { title: 'Caution! SpOOpy!', question: this.downloadWarning }
+        data: { title: 'Caution! SpOOpy!', question: `${link}\n\n${this.downloadWarning}` }
       })
       .afterClosed()
       .subscribe(result => {
@@ -279,7 +402,10 @@ export class BotService {
   }
 
   submitNewRequest(request: Request) {
-    return request.id !== null ? this.requestService.update(request) : this.requestService.create(request);
+    console.log(request.id);
+    return request.id !== null && request.id !== undefined
+      ? this.requestService.update(request)
+      : this.requestService.create(request);
   }
 
   async editPollRequests(poll: StreamerPoll, pollRequests: StreamerPollRequest[]) {
@@ -351,6 +477,8 @@ export class BotService {
 
     zip(...changes).subscribe(d => {
       this.refreshData(Tables.streamer_polls);
+
+      this.snackbar.add(`Updated Poll`, null, { duration: 3000 });
     });
   }
 
@@ -358,6 +486,8 @@ export class BotService {
     this.deleting = true;
     this.streamerPollsService.delete(poll.id).subscribe(poll => {
       this.deleting = false;
+
+      this.snackbar.add(`Deleted Poll`, null, { duration: 3000 });
     });
   }
 
@@ -418,7 +548,30 @@ export class BotService {
       });
       zip(...changes).subscribe(d => {
         this.refreshData(Tables.streamer_polls);
+
+        this.snackbar.add(`Created Poll`, null, { duration: 3000 });
       });
     });
+  }
+
+  async requestHelp() {
+    const message = await this.dialog
+      .open(InputDialogComponent, {
+        data: {
+          title: `Allow A Staff Member To Control Your Bot - (Check Your Twitch Chat Too)`,
+          placeholder: `Help Message`,
+          initialValue: '',
+          inputType: 'text',
+          validators: [Validators.required]
+        }
+      })
+      .afterClosed()
+      .toPromise();
+
+    if (message) {
+      this.utilitiesService.requestHelp(message).subscribe(() => {
+        console.log('submitted help request');
+      });
+    }
   }
 }

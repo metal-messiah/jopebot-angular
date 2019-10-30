@@ -57,6 +57,10 @@ export class RequestCardComponent implements OnInit {
     return false;
   }
 
+  canLike(): boolean {
+    return this.view === ParentComponent.ViewerDashboardComponent && this.type === RequestCardType.REQUEST_QUEUE;
+  }
+
   canDelete(): boolean {
     if (this.view === ParentComponent.ViewerDashboardComponent) {
       if (this.botService.menuTarget) {
@@ -67,10 +71,46 @@ export class RequestCardComponent implements OnInit {
     if (this.view === ParentComponent.BotComponent) {
       return this.type === RequestCardType.REQUEST_QUEUE;
     }
+    return false;
+  }
+
+  canDeleteAll(): boolean {
+    if (this.view === ParentComponent.BotComponent) {
+      return (
+        (this.type === RequestCardType.REQUEST_QUEUE && this.botService.requestQueue.length > 0) ||
+        (this.type === RequestCardType.PLAYED_REQUESTS && this.botService.playedRequests.length > 0)
+      );
+    }
+    return false;
+  }
+
+  deleteAllRequests() {
+    const dataset =
+      this.type === RequestCardType.REQUEST_QUEUE ? this.botService.requestQueue : this.botService.playedRequests;
+    this.botService.deleteAllRequests(dataset);
+  }
+
+  shouldShowNowPlaying(index: number) {
+    return this.type === RequestCardType.PLAYED_REQUESTS && index === 0;
+  }
+
+  getBadge(index) {
+    if (this.type === RequestCardType.REQUEST_QUEUE) {
+      return index + 1;
+    }
+    return this.requests.length - index;
   }
 
   canAddToPoll(): boolean {
     return this.view === ParentComponent.BotComponent && this.type === RequestCardType.REQUEST_QUEUE;
+  }
+
+  canPlayRandom(): boolean {
+    return (
+      this.view === ParentComponent.BotComponent &&
+      this.type === RequestCardType.REQUEST_QUEUE &&
+      this.botService.requestQueue.length > 0
+    );
   }
 
   getLikeColor(request: Request) {

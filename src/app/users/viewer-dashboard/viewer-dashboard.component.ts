@@ -23,6 +23,7 @@ import { SocketService } from 'app/core/services/socket.service';
 import { StreamerSettings } from 'app/models/streamer-settings';
 import { BotService } from 'app/core/services/bot.service';
 import { RequestCardType } from '../../enums/request-card-type';
+import { SnackbarQueueService } from 'app/core/services/snackbar-queue.service';
 
 @Component({
   selector: 'app-viewer-dashboard',
@@ -50,7 +51,6 @@ export class ViewerDashboardComponent implements OnInit {
   songs: StreamerSong;
 
   streamerSettings: StreamerSettings = null;
-  userRequests = 0;
 
   snacks = [];
   private snackConfig: MatSnackBarConfig = {
@@ -68,7 +68,7 @@ export class ViewerDashboardComponent implements OnInit {
     private socketService: SocketService,
     private streamerSettingsService: StreamerSettingsService,
     private botService: BotService,
-    private snackbar: MatSnackBar
+    private snackbar: SnackbarQueueService
   ) {}
 
   async ngOnInit() {
@@ -78,49 +78,8 @@ export class ViewerDashboardComponent implements OnInit {
       await this.getUserFromId(this.streamerIdParam);
       if (this.userFromId) {
         this.botService.use(this.userFromId);
-        this.refreshData();
       }
     });
-  }
-
-  refreshData() {
-    this.getCounts();
-  }
-
-  getCounts() {
-    this.requestService
-      .count({
-        user_id: this.authService.currentUser.id,
-        streamer_id: this.streamerIdParam,
-        'played is': null
-      })
-      .subscribe(count => {
-        this.userRequests = count;
-        if (!this.botService.canRequest(this.userRequests)) {
-          console.log('cant request');
-          if (this.botService.streamerSettings.requestsPerUser <= this.userRequests) {
-            console.log('reached limit');
-            this.snacks.push('You have reached your request limit');
-          }
-          if (this.botService.streamerSettings.requestQueueLimit <= this.botService.requestQueue.length) {
-            console.log('full');
-            this.snacks.push('The request list is full');
-          }
-          this.handleSnackbar();
-        }
-      });
-  }
-
-  handleSnackbar() {
-    const msg = this.snacks.length ? this.snacks.shift() : null;
-    if (msg) {
-      this.snackbar
-        .open(msg, null, this.snackConfig)
-        .afterDismissed()
-        .subscribe(() => {
-          this.handleSnackbar();
-        });
-    }
   }
 
   async getUserFromId(id: string | number) {

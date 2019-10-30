@@ -13,6 +13,8 @@ import { StreamerPollsVotesService } from 'app/core/services/streamer-polls-vote
 import { StreamerPollVote } from 'app/models/streamer-poll-vote';
 import { StreamerPollVote as InputPollVote } from 'app/models/server-input/streamer-poll-vote';
 import { StreamerPollsService } from 'app/core/services/streamer-polls.service';
+import { MatSnackBar } from '@angular/material';
+import { SnackbarQueueService } from 'app/core/services/snackbar-queue.service';
 
 class ChartConfig {
   constructor(
@@ -43,13 +45,16 @@ export class PollCardComponent implements OnInit, OnChanges {
 
   hiddenGraphs = [];
 
+  snacks = [];
+
   public charts = {};
   constructor(
     private botService: BotService,
     private authService: AuthService,
     private route: ActivatedRoute,
     private streamerPollsVotesService: StreamerPollsVotesService,
-    private streamerPollsService: StreamerPollsService
+    private streamerPollsService: StreamerPollsService,
+    private snackbar: SnackbarQueueService
   ) {
     monkeyPatchChartJsTooltip();
     monkeyPatchChartJsLegend();
@@ -72,7 +77,6 @@ export class PollCardComponent implements OnInit, OnChanges {
     this.polls.forEach(poll => {
       poll.requests.sort((a, b) => b.id - a.id);
     });
-    console.log(this.polls);
     this.buildCharts();
   }
 
@@ -168,7 +172,9 @@ export class PollCardComponent implements OnInit, OnChanges {
         streamer_poll_request_id: pollRequest.id
       });
       this.streamerPollsVotesService.create(vote).subscribe(vote => {
-        console.log(vote);
+        this.snackbar.add(`Voted For ${this.botService.getRequestMessage(pollRequest.request)}`, null, {
+          duration: 3000
+        });
       });
     } else {
       this.voting = true;
@@ -217,7 +223,7 @@ export class PollCardComponent implements OnInit, OnChanges {
   }
 
   shouldShowAddPoll() {
-    return this.view === ParentComponent.BotComponent;
+    return this.view === ParentComponent.BotComponent && this.botService.requestQueue.length > 0;
   }
 
   shouldShowPlayButton(poll: StreamerPoll) {
@@ -227,8 +233,9 @@ export class PollCardComponent implements OnInit, OnChanges {
   togglePoll(poll: StreamerPoll) {
     this.toggling = true;
     poll.isOpen = !poll.isOpen;
-    this.streamerPollsService.update(poll).subscribe(poll => {
-      console.log(poll);
+    console.log(poll.isOpen);
+    this.streamerPollsService.update(poll).subscribe(p => {
+      this.snackbar.add(`Set Poll to ${poll.isOpen ? 'Open' : 'Closed'}`, null, { duration: 3000 });
     });
   }
 

@@ -1,13 +1,17 @@
-export class User {
-  bio: string;
-  displayName: string;
-  email: string;
-  id: number;
-  logo: string;
-  username: string;
+import { UserRole } from 'app/enums/user-role';
 
-  createdAt: Date;
-  updatedAt: Date;
+export class User {
+  bio?: string;
+  displayName?: string;
+  email?: string;
+  id?: number;
+  logo?: string;
+  username?: string;
+
+  role?: UserRole;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 
   constructor(obj: User) {
     Object.assign(this, obj);

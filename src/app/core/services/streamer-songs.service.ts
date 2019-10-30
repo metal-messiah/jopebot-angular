@@ -21,4 +21,10 @@ export class StreamerSongsService extends CrudService<StreamerSong> {
   protected createEntityFromObj(entityObj): StreamerSong {
     return new StreamerSong(entityObj);
   }
+
+  submitForm(userId: number, formData: FormData): Observable<any> {
+    return this.http.post<any>(this.rest.getHost() + `/api/streamer-songs/${userId}/submit-form`, formData, {
+      withCredentials: true
+    });
+  }
 }

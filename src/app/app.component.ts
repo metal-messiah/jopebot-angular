@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './core/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
 import { trigger, transition, useAnimation } from '@angular/animations';
 import { flipInY, fadeIn, rubberBand, slideInUp } from 'ng-animate';
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -20,7 +19,12 @@ export class AppComponent implements OnInit {
   checkedLogin = false;
   isAuthenticated;
 
-  constructor(private _location: Location, private auth: AuthService, private router: Router) {}
+  constructor(
+    private _location: Location,
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   async ngOnInit() {
     this.isAuthenticated = await this.auth.isAuthenticated().toPromise();
@@ -38,7 +42,8 @@ export class AppComponent implements OnInit {
   logout() {
     if (confirm('Are you sure you want to log out?')) {
       this.auth.logout().subscribe(() => {
-        this.router.navigate(['/home']);
+        this.router.navigate(['home'], { relativeTo: this.route });
+        this.auth.currentUser = null;
       });
     }
   }

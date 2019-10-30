@@ -1,0 +1,18 @@
+<div id="shortcuts" class="module" *ngIf="authService.currentUser">
+  <h3>Twitch Chat Shortcuts</h3>
+  <div class="item-container">
+    <div class="item-card">
+      <div class="item-card-row">
+        <button (click)="postLink()" mat-flat-button><i class="fas fa-link"></i> Post My Link to Twitch</button>
+      </div>
+      <div class="item-card-row">
+        <button (click)="generateFakeRequests()" mat-flat-button>
+          <i class="fas fa-vial"></i> Generate 5 Fake Requests
+        </button>
+      </div>
+      <div class="item-card-row">
+        <button (click)="botService.requestHelp()" mat-flat-button><i class="fas fa-question"></i> Request Help</button>
+      </div>
+    </div>
+  </div>
+</div>

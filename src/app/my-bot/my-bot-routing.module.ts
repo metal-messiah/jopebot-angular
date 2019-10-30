@@ -7,6 +7,7 @@ import { StreamerSettingsComponent } from './streamer-settings/streamer-settings
 import { StreamerSongsComponent } from './streamer-songs/streamer-songs.component';
 import { BotComponent } from './bot/bot.component';
 import { SocketGuard } from 'app/core/services/socket.guard';
+import { RoleGuard } from 'app/core/services/role.guard';
 
 const routes: Routes = [
   {
@@ -22,7 +23,29 @@ const routes: Routes = [
       {
         path: 'settings',
         component: StreamerSettingsComponent,
+        canActivate: [AuthGuard, SocketGuard]
+      },
+      {
+        path: 'files',
+        component: StreamerSongsComponent,
         canActivate: [AuthGuard]
+      }
+    ]
+  },
+  {
+    path: 'bot/:userid',
+    component: MyBotComponent,
+    canActivate: [AuthGuard, RoleGuard, SocketGuard],
+    children: [
+      {
+        path: '',
+        component: BotComponent,
+        canActivate: [AuthGuard, SocketGuard]
+      },
+      {
+        path: 'settings',
+        component: StreamerSettingsComponent,
+        canActivate: [AuthGuard, SocketGuard]
       },
       {
         path: 'files',

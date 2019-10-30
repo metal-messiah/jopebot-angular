@@ -16,6 +16,7 @@ export class AuthGuard implements CanActivate {
     if (this.authService.currentUser) {
       return this.authService.isAuthenticated().pipe(
         tap(authenticated => {
+          console.log(authenticated);
           if (!authenticated) {
             this.authService.signIn(state.url);
           }
@@ -27,6 +28,7 @@ export class AuthGuard implements CanActivate {
           if (user) {
             resolve(true);
           } else {
+            console.log('NO USER');
             this.authService.signIn(state.url);
             resolve(false);
           }

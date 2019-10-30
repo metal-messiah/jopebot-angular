@@ -1,5 +1,7 @@
 <div id="polls" class="module" *ngIf="authService.currentUser">
-  <h3>Polls</h3>
+  <h3>
+    Polls <span *ngIf="polls.length">({{ polls.length | number }})</span>
+  </h3>
   <mat-progress-bar *ngIf="botService.fetching.polls" mode="indeterminate"></mat-progress-bar>
   <div class="item-container">
     <button
@@ -14,7 +16,8 @@
       <div
         class="item-card-row"
         *ngFor="let pollRequest of poll.requests; let prI = index"
-        [matBadge]="userHasVoted(poll) ? pollRequest.votes.length : ''"
+        [matBadge]="userHasVoted(poll) || canDeletePoll() ? pollRequest.votes.length : ''"
+        [matBadgePosition]="userHasVoted(poll) ? 'after' : 'before'"
       >
         <div class="item-card-title" [ngStyle]="{ color: getRowColor(prI) }">
           {{ botService.getRequestMessage(pollRequest.request) }}

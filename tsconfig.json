@@ -13,5 +13,5 @@
     "typeRoots": ["node_modules/@types"],
     "lib": ["es2016", "dom"]
   },
-  "exclude": ["./node_modules/fuse.js/index.d.ts"]
+  "exclude": ["./node_modules/fuse.js/index.d.ts", "node_modules"]
 }

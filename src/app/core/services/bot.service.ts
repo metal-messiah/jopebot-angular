@@ -26,6 +26,11 @@ import { SnackbarQueueService } from './snackbar-queue.service';
 import { StreamerSongsService } from './streamer-songs.service';
 import { StreamerSong } from 'app/models/streamer-song';
 import { UtilitiesService } from './utilities.service';
+import { StreamerUserPrivilegesService } from './streamer-user-privileges.service';
+import { StreamerUserPrivilege } from 'app/models/streamer-user-privilege';
+import { TwitchApiService } from './twitch-api.service';
+import { UserRole } from 'app/enums/user-role';
+import { finalize } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +41,7 @@ export class BotService {
   loading = true;
   message = '';
   streamerSettings: StreamerSettings;
-  fetching = { requests: false, songs: false, polls: false };
+  fetching = { requests: false, songs: false, polls: false, sup: false };
 
   playing = null;
 
@@ -53,12 +58,19 @@ export class BotService {
 
   gotSettings$: ReplaySubject<void> = new ReplaySubject<void>();
 
+  gotPrivs$: ReplaySubject<void> = new ReplaySubject<void>();
+
   deleting = false;
   liking = null;
 
   userRequests: number;
 
   streamerSongsText: string;
+
+  privileges: StreamerUserPrivilege[] = [];
+
+  allowed = false;
+  checkingAllowed = false;
 
   constructor(
     private requestService: RequestService,
@@ -72,7 +84,9 @@ export class BotService {
     private snackbar: SnackbarQueueService,
     private authService: AuthService,
     private streamerSongsService: StreamerSongsService,
-    private utilitiesService: UtilitiesService
+    private utilitiesService: UtilitiesService,
+    private streamerUserPrivilegesService: StreamerUserPrivilegesService,
+    private twitchApiService: TwitchApiService
   ) {
     this.socketService.refreshDatasets$.subscribe((table: Tables) => {
       console.log('REFRESH FOR ', table);
@@ -85,27 +99,35 @@ export class BotService {
       if (!this.user || this.user.id !== Number(user)) {
         this.userService.getOneById(user).subscribe((u: User) => {
           if (u) {
-            console.log('Bot Service is now using user ', u.displayName);
             this.reset();
-            this.user = u;
-            this.getStreamerSettings();
+            this.socketService.createRoom(u.id).subscribe(() => {
+              console.log('Bot Service is now using user ', u.displayName);
+              this.socketService.connect(u.id);
+              this.user = u;
+              this.getStreamerSettings();
+            });
           }
         });
       }
     } else if (!this.user || this.user.id !== user.id) {
-      console.log('Bot Service is now using user ', user.displayName);
       this.reset();
-      this.user = user;
-      this.getStreamerSettings();
+      this.socketService.createRoom(user.id).subscribe(() => {
+        console.log('Bot Service is now using user ', user.displayName);
+        this.socketService.connect(user.id);
+        this.user = user;
+        this.getStreamerSettings();
+      });
     }
   }
 
   private reset() {
+    this.allowed = null;
+    this.checkingAllowed = false;
     this.user = null;
     this.loading = true;
     this.message = '';
     this.streamerSettings = null;
-    this.fetching = { requests: false, songs: false, polls: false };
+    this.fetching = { requests: false, songs: false, polls: false, sup: false };
     this.playing = null;
     this.requestQueue = [];
     this.menuTarget = null;
@@ -118,6 +140,57 @@ export class BotService {
     this.liking = null;
     this.userRequests = null;
     this.streamerSongsText = null;
+    this.privileges = [];
+  }
+
+  hasAccess(streamerId?: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      if (this.allowed !== null && this.allowed === true) {
+        console.log(this.allowed);
+        resolve(this.allowed);
+      } else if (!streamerId || this.authService.currentUser.id === streamerId) {
+        // we know they are using their own bot
+        this.allowed = true;
+        console.log(this.allowed);
+        resolve(this.allowed);
+      } else if (
+        this.authService.currentUser.role === UserRole.STAFF ||
+        this.authService.currentUser.role === UserRole.ADMIN
+      ) {
+        // admins and staff can control without privs
+        this.allowed = true;
+        console.log(this.allowed);
+        resolve(this.allowed);
+      } else {
+        // else check their user privs
+        if (!this.checkingAllowed) {
+          this.checkingAllowed = true;
+          this.streamerUserPrivilegesService
+            .getAll({ streamer_id: streamerId, user_id: this.authService.currentUser.id })
+            .pipe(
+              finalize(() => {
+                this.checkingAllowed = false;
+                resolve(this.allowed);
+              })
+            )
+            .subscribe(
+              sups => {
+                if (sups.length && sups[0].isAdmin) {
+                  this.allowed = true;
+                  console.log(this.allowed);
+                } else {
+                  this.allowed = false;
+                  console.log(this.allowed);
+                }
+              },
+              err => {
+                this.allowed = false;
+                console.log(this.allowed);
+              }
+            );
+        }
+      }
+    });
   }
 
   async getAllRequests() {
@@ -134,6 +207,99 @@ export class BotService {
     this.sortByDateField(this.playedRequests, 'played', false);
 
     this.fetching.requests = false;
+  }
+
+  getStreamerUserPrivileges() {
+    this.fetching.sup = true;
+    this.streamerUserPrivilegesService
+      .getAll({ streamer_id: this.user.id })
+      .subscribe((privs: StreamerUserPrivilege[]) => {
+        this.privileges = privs;
+        this.sortByDateField(this.privileges, 'createdAt', true);
+        this.gotPrivs$.next();
+        this.fetching.sup = false;
+      });
+  }
+
+  updateStreamerUserPrivileges(priv: StreamerUserPrivilege) {
+    this.fetching.sup = true;
+    this.streamerUserPrivilegesService.update(priv).subscribe((p: StreamerUserPrivilege) => {
+      console.log('updated ', p);
+      this.fetching.sup = false;
+    });
+  }
+
+  async addStreamerUserPrivilege() {
+    this.fetching.sup = true;
+    const username = await this.dialog
+      .open(InputDialogComponent, {
+        data: {
+          title: `Twitch Username`,
+          placeholder: `Enter a valid twitch username`,
+          initialValue: '',
+          inputType: 'text',
+          validators: [Validators.required]
+        }
+      })
+      .afterClosed()
+      .toPromise();
+    if (username) {
+      this.twitchApiService.getUserIdsFromUsernames([username]).subscribe((users: User[]) => {
+        if (users.length) {
+          const createSup = (user: User) => {
+            console.log('creating sup');
+            const sup = new StreamerUserPrivilege({
+              user,
+              streamer: this.user
+            });
+            this.streamerUserPrivilegesService.create(sup).subscribe(
+              s => {
+                console.log('created', s);
+                this.fetching.sup = false;
+              },
+              err => {
+                console.log(err);
+                this.fetching.sup = false;
+                this.dialog.open(DisplayDialogComponent, {
+                  data: {
+                    title: `Error - POSTGRES ${err.error.code}`,
+                    content: err.error.detail
+                  }
+                });
+              }
+            );
+          };
+          users.forEach(user => {
+            this.userService.exists(user.id).subscribe(
+              exists => {
+                if (exists) {
+                  createSup(user);
+                } else {
+                  // doesnt exist, need to make a user
+                  this.userService.create(user).subscribe(u => {
+                    console.log('created', u);
+                    createSup(u);
+                  });
+                }
+              },
+              err => {
+                this.fetching.sup = false;
+              }
+            );
+          });
+        } else {
+          this.fetching.sup = false;
+          this.dialog.open(DisplayDialogComponent, {
+            data: {
+              title: `Uh Oh...`,
+              content: 'No User Found In TwitchAPI with that username...'
+            }
+          });
+        }
+      });
+    } else {
+      this.fetching.sup = false;
+    }
   }
 
   sortByDateField(list: any[], property: string, asc: boolean) {
@@ -174,6 +340,7 @@ export class BotService {
         this.getAllRequests();
         this.getPolls();
         this.getCounts();
+        this.getStreamerUserPrivileges();
     }
   }
 
@@ -181,7 +348,8 @@ export class BotService {
     if (this.streamerSettings) {
       return (
         this.streamerSettings.requestsPerUser > this.userRequests &&
-        this.streamerSettings.requestQueueLimit > this.requestQueue.length
+        this.streamerSettings.requestQueueLimit > this.requestQueue.length &&
+        !this.streamerSettings.isPaused
       );
     }
     return false;
@@ -204,6 +372,10 @@ export class BotService {
           if (this.streamerSettings.requestQueueLimit <= this.requestQueue.length) {
             console.log('full');
             this.snackbar.add('The request list is full');
+          }
+          if (this.streamerSettings.isPaused) {
+            console.log('paused');
+            this.snackbar.add(`${this.user.displayName} has PAUSED new requests`);
           }
         }
       });

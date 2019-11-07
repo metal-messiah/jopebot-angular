@@ -8,5 +8,6 @@ export const environment = {
   production: false,
   envName: 'dev',
   WEB_SERVICE_HOST: 'https://jopebot-web-beta.herokuapp.com',
+  // WEB_SERVICE_HOST: 'http://localhost:3001',
   VERSION: require('../../package.json').version
 };

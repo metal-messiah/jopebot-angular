@@ -1,16 +1,16 @@
-import { Entity } from "./entity";
-import { User } from "./user";
+import { Entity } from './entity';
+import { User } from './user';
 
 export class StreamerUserPrivilege implements Entity {
-  id: number;
-  user: User;
-  streamer: User;
-  is_admin: boolean;
-  is_blacklisted: boolean;
+  id?: number;
+  user?: User;
+  streamer?: User;
+  isAdmin?: boolean;
+  isBlacklisted?: boolean;
 
-  createdAt: Date;
-  createdBy: User;
-  updatedAt: Date;
+  createdAt?: Date;
+  createdBy?: User;
+  updatedAt?: Date;
 
   constructor(obj: StreamerUserPrivilege) {
     Object.assign(this, obj);

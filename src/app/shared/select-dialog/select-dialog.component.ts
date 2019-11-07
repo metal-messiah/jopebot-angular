@@ -20,11 +20,17 @@ export class SelectDialogComponent implements OnInit {
 
   initialData: any[];
 
+  multiple = true;
+
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     this.title = data.title;
     this.options = data.options;
     this.initialData = data.initialData;
-    const matches = this.options.filter(o => this.initialData.map(i => i.id).includes(o.id));
+    this.multiple = data.multiple !== undefined ? data.multiple : true;
+    const matches = this.options.filter(o =>
+      this.initialData.map(i => (i.id !== undefined ? i.id : i)).includes(o.id !== undefined ? o.id : o)
+    );
+    console.log(matches);
     this.selectControl = new FormControl(matches, [Validators.required]);
     this.labels = data.labels;
     this.extraButtonLabels = data.extraButtonLabels; // list of strings
@@ -36,5 +42,13 @@ export class SelectDialogComponent implements OnInit {
 
   shouldCheck(option) {
     return this.initialData.map(d => d.id).includes(option.id);
+  }
+
+  getSelectedMessage(): string {
+    if (this.multiple) {
+      return 'Selected ' + this.selectControl.value.length.toLocaleString() + ' Items';
+    } else {
+      return this.selectControl.value;
+    }
   }
 }

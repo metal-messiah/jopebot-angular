@@ -1,4 +1,6 @@
-<h2 style="margin-bottom: 5px;" *ngIf="botService.user">{{ botService.user.displayName }}</h2>
+<!-- <h2 style="margin-bottom: 5px;" *ngIf="botService.user">
+  {{ botService.user.displayName || botService.user.username }}
+</h2> -->
 <div class="inner-content">
   <div style="width: 100%;">
     <div class="loading-container">
@@ -14,7 +16,16 @@
       ></app-request-card>
       <app-poll-card [polls]="botService.polls"> </app-poll-card>
       <app-shortcuts-card></app-shortcuts-card>
-
+      <button
+        (click)="toggleToUser()"
+        id="toggle-to-bot-button"
+        mat-fab
+        color="warn"
+        matTooltip="User View"
+        matTooltipPosition="right"
+      >
+        <i class="fas fa-user"></i>
+      </button>
       <mat-toolbar class="bottom-bar">
         <button
           mat-flat-button

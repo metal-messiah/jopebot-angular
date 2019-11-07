@@ -6,6 +6,8 @@ import { Tables } from 'app/enums/tables';
 
 export class SocketService {
   io: io;
+  attempts = 0;
+  success = false;
 
   refreshDatasets$: Subject<Tables> = new Subject<Tables>();
 
@@ -14,20 +16,31 @@ export class SocketService {
   }
 
   connect(userId) {
-    this.io = io(`${this.rest.getHost()}/${userId}`);
-    this.io.on('connect', function(data) {
-      console.log('connected to room', userId);
-    });
-    this.io.on('INFO', function(data) {
-      console.log(data);
-    });
-    this.io.on('REFRESH', table => {
-      table = table.replace(/_/g, '-');
-      this.refreshDatasets$.next(table);
-    });
-    this.io.on('disconnect', function(data) {
-      console.log(data);
-    });
+    if (this.attempts < 5 && !this.success) {
+      this.attempts++;
+      console.log('Attempt to connect to socket -- ', this.attempts);
+      this.io = io(`${this.rest.getHost()}/${userId}`);
+      this.io.on('connect', data => {
+        console.log('connected to room', userId);
+        this.success = true;
+        this.attempts = 0;
+        setTimeout(() => (this.success = false), 5000);
+      });
+      this.io.on('INFO', data => {
+        console.log(data);
+      });
+      this.io.on('REFRESH', table => {
+        table = table.replace(/_/g, '-');
+        this.refreshDatasets$.next(table);
+      });
+      this.io.on('disconnect', data => {
+        console.log(data);
+      });
+
+      setTimeout(() => {
+        this.connect(userId);
+      }, 1000);
+    }
   }
 
   disconnect() {
@@ -37,6 +50,7 @@ export class SocketService {
   }
 
   createRoom(userId: number): Observable<void> {
+    console.log('create room');
     const url = this.rest.getHost() + `/api/socket/${userId}`;
     return this.http.post<void>(url, { withCredentials: true });
   }

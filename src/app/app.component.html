@@ -11,7 +11,16 @@
         class="auth-button"
       >
         <div class="auth-text">
-          <fa-icon [icon]="getAuthIcon()" [pulse]="getAuthIconPulse()"></fa-icon>
+          <i
+            [ngClass]="{
+              fas: (auth.currentUser && checkedLogin) || !checkedLogin,
+              fab: !auth.currentUser && checkedLogin,
+              'fa-spinner': !checkedLogin,
+              'fa-user': auth.currentUser,
+              'fa-pulse': !checkedLogin
+            }"
+          ></i>
+          <!-- <fa-icon [icon]="getAuthIcon()" [pulse]="getAuthIconPulse()"></fa-icon> -->
           {{ getAuthText() }}
         </div>
         <div *ngIf="checkedLogin" class="auth-action">
@@ -31,7 +40,7 @@
       Blog
     </button>
     <!-- FORCE THE MENU TO THE RIGHT ALWAYS! -->
-    <button mat-button [matMenuTriggerFor]="extras">More</button>
+    <button mat-button [matMenuTriggerFor]="extras"><i class="fas fa-caret-down"></i> More</button>
     <mat-menu #extras="matMenu">
       <button mat-menu-item routerLink="/about" routerLinkActive="mat-warn">
         About

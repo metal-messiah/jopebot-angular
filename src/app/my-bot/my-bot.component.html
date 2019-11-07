@@ -1,14 +1,51 @@
 <mat-toolbar class="header-bar" color="primary">
   <mat-toolbar-row class="secondary" [@slideInUp]="slideInUp">
-    <button mat-button routerLink="./" routerLinkActive="mat-warn" [routerLinkActiveOptions]="{ exact: true }">
-      Dashboard
+    <button mat-button (click)="location.back()" matTooltip="Go Back" matTooltipPosition="below">
+      <i class="fas fa-chevron-circle-left"></i>
     </button>
-    <button mat-button routerLink="./settings" routerLinkActive="mat-warn">
-      Settings
+    <div class="username" *ngIf="botService.user">
+      {{ botService.user.displayName | uppercase }}
+    </div>
+    <button
+      matTooltip="Dashboard"
+      matTooltipPosition="below"
+      mat-button
+      routerLink="./"
+      routerLinkActive="mat-warn"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <i class="fas fa-chart-bar"></i>
     </button>
-    <button mat-button routerLink="./files" routerLinkActive="mat-warn">
-      Files
+    <button
+      matTooltip="Settings"
+      matTooltipPosition="below"
+      mat-button
+      routerLink="./settings"
+      routerLinkActive="mat-warn"
+    >
+      <i class="fas fa-cogs"></i>
     </button>
+    <button
+      matTooltip="Search File"
+      matTooltipPosition="below"
+      mat-button
+      routerLink="./files"
+      routerLinkActive="mat-warn"
+    >
+      <i class="fas fa-file"></i>
+    </button>
+    <button
+      matTooltip="User Privileges"
+      matTooltipPosition="below"
+      mat-button
+      routerLink="./privileges"
+      routerLinkActive="mat-warn"
+    >
+      <i class="fas fa-user-lock"></i>
+    </button>
+    <!-- <button matTooltip="Go To User View" matTooltipPosition="below" mat-button (click)="toggleToUser()">
+      <i class="fas fa-user"></i>
+    </button> -->
   </mat-toolbar-row>
 </mat-toolbar>
 <br />

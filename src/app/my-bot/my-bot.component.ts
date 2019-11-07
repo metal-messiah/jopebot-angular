@@ -5,6 +5,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { BotService } from 'app/core/services/bot.service';
 import { AuthService } from 'app/core/services/auth.service';
 import { UserRole } from 'app/enums/user-role';
+import { StreamerUserPrivilegesService } from 'app/core/services/streamer-user-privileges.service';
+import { resolve } from 'q';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-my-bot',
@@ -15,17 +18,20 @@ import { UserRole } from 'app/enums/user-role';
 export class MyBotComponent implements OnInit {
   streamerIdParam;
   constructor(
+    private location: Location,
     private router: Router,
     private route: ActivatedRoute,
     private botService: BotService,
-    private authService: AuthService
+    private authService: AuthService,
+    private streamerUserPrivilegesService: StreamerUserPrivilegesService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.route.paramMap.subscribe(async params => {
-      if (this.hasBetaAccess()) {
+      this.streamerIdParam = params.get('userid');
+      const hasAccess = await this.botService.hasAccess(this.streamerIdParam);
+      if (hasAccess) {
         console.log('activate bot service from my-bot component');
-        this.streamerIdParam = params.get('userid');
         if (this.streamerIdParam) {
           this.botService.use(this.streamerIdParam);
         } else {
@@ -37,14 +43,6 @@ export class MyBotComponent implements OnInit {
     });
   }
 
-  hasBetaAccess() {
-    return (
-      this.authService.currentUser.role === UserRole.STAFF ||
-      this.authService.currentUser.role === UserRole.DONOR ||
-      this.authService.currentUser.role === UserRole.ADMIN
-    );
-  }
-
   navigate(path: string) {
     let url = '';
     if (this.streamerIdParam) {
@@ -54,5 +52,9 @@ export class MyBotComponent implements OnInit {
     }
     console.log(url);
     this.router.navigate([url]), { relativeTo: this.route };
+  }
+
+  toggleToUser() {
+    this.router.navigate(['users', this.botService.user.id]);
   }
 }

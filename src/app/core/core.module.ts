@@ -25,6 +25,7 @@ import { SnackbarQueueService } from './services/snackbar-queue.service';
 import { ChatService } from './services/chat.service';
 import { RoleGuard } from './services/role.guard';
 import { UtilitiesService } from './services/utilities.service';
+import { TwitchApiService } from './services/twitch-api.service';
 
 @NgModule({
   imports: [CommonModule],
@@ -42,6 +43,7 @@ import { UtilitiesService } from './services/utilities.service';
     SocketService,
     StorageService,
     UtilitiesService,
+    TwitchApiService,
     RestService,
     UserService,
     RequestService,

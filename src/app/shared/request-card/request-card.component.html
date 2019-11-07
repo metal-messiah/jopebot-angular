@@ -1,17 +1,37 @@
 <div [id]="getId()" class="module" *ngIf="authService.currentUser">
   <h3>
-    {{ type }} <span *ngIf="requests.length">({{ requests.length | number }})</span>
+    {{ type }}
+    <!-- <span *ngIf="requests.length">({{ requests.length | number }})</span> -->
   </h3>
   <mat-progress-bar *ngIf="botService.fetching.requests" mode="indeterminate"></mat-progress-bar>
   <div class="item-container">
+    <mat-form-field class="text-form" color="accent" *ngIf="!botService.fetching.requests && requests.length">
+      <input matInput placeholder="Search Requests" [formControl]="searchControl" />
+      <mat-hint *ngIf="requests.length">
+        {{ (requestsDisplay ? requestsDisplay.length : requests.length) | number }} /
+        {{ requests.length | number }} Requests</mat-hint
+      >
+    </mat-form-field>
     <button
       *ngIf="!botService.fetching.requests && canPlayRandom()"
       mat-flat-button
       color="primary"
       (click)="botService.playRandom()"
     >
-      <i class="fas fa-random"></i> Play Random</button
-    ><button
+      <i class="fas fa-random"></i> Random
+    </button>
+    <button
+      color="accent"
+      *ngIf="!botService.fetching.requests && canSort()"
+      mat-flat-button
+      [matMenuTriggerFor]="sortMenu"
+      matTooltip="Sort Requests"
+      matTooltipPosition="right"
+    >
+      <i class="fas fa-sort"></i> {{ sortType }}
+    </button>
+
+    <button
       *ngIf="!botService.fetching.requests && canDeleteAll()"
       mat-flat-button
       color="warn"
@@ -21,7 +41,7 @@
     </button>
     <div
       class="item-card"
-      *ngFor="let request of requests; let i = index"
+      *ngFor="let request of requestQueue; let i = index"
       [matBadge]="getBadge(i)"
       matBadgePosition="before"
     >
@@ -43,7 +63,10 @@
       </div>
       <div class="item-card-row">
         <div class="item-card-date">
-          {{ getDate(request) | date: 'short' }}
+          <div *ngIf="sortType === requestCardSortType.Date">{{ getDate(request) | date: 'short' }}</div>
+          <div class="item-card-likes" *ngIf="sortType === requestCardSortType.Likes">
+            {{ getLikes(request)[0] | number }} {{ getLikes(request)[1] }}
+          </div>
         </div>
         <button
           *ngIf="canLike()"
@@ -118,5 +141,11 @@
 
   <button mat-menu-item *ngIf="canDelete()" (click)="botService.deleteRequest()">
     <i class="fas fa-trash-alt"></i> Delete
+  </button>
+</mat-menu>
+
+<mat-menu #sortMenu="matMenu" yPosition="below" xPosition="after">
+  <button *ngFor="let sType of sortTypes" mat-menu-item (click)="setSortType(sType)">
+    <i class="fas fa-sort"></i> {{ sType }}
   </button>
 </mat-menu>

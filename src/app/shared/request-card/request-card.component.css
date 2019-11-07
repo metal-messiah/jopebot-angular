@@ -25,6 +25,10 @@ h5 {
   text-overflow: ellipsis;
 }
 
+mat-form-field {
+  margin: 0 30px 10px;
+}
+
 .loading-container {
   display: flex;
   align-items: center;
@@ -55,6 +59,10 @@ h5 {
   align-items: center;
   justify-content: space-evenly;
   flex-wrap: wrap;
+}
+
+.item-container > button {
+  margin-bottom: 25px;
 }
 
 .item-card {
@@ -227,6 +235,11 @@ h5 {
   background: #ffab40;
   color: black;
   position: relative;
+}
+
+.item-card-likes {
+  color: #ff5722;
+  font-size: small;
 }
 
 i[data-likes]::after {

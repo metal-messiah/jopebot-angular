@@ -7,9 +7,10 @@ import { SharedModule } from 'app/shared/shared.module';
 import { BotComponent } from './bot/bot.component';
 import { StreamerSongsComponent } from './streamer-songs/streamer-songs.component';
 import { StreamerSettingsComponent } from './streamer-settings/streamer-settings.component';
+import { PrivilegesComponent } from './privileges/privileges.component';
 
 @NgModule({
-  declarations: [MyBotComponent, BotComponent, StreamerSettingsComponent, StreamerSongsComponent],
+  declarations: [MyBotComponent, BotComponent, StreamerSettingsComponent, StreamerSongsComponent, PrivilegesComponent],
   imports: [CommonModule, MyBotRoutingModule, SharedModule]
 })
 export class MyBotModule {}

@@ -8,26 +8,32 @@ import { StreamerSongsComponent } from './streamer-songs/streamer-songs.componen
 import { BotComponent } from './bot/bot.component';
 import { SocketGuard } from 'app/core/services/socket.guard';
 import { RoleGuard } from 'app/core/services/role.guard';
+import { PrivilegesComponent } from './privileges/privileges.component';
 
 const routes: Routes = [
   {
     path: 'bot',
     component: MyBotComponent,
-    canActivate: [AuthGuard, SocketGuard],
+    canActivate: [AuthGuard],
     children: [
       {
         path: '',
         component: BotComponent,
-        canActivate: [AuthGuard, SocketGuard]
+        canActivate: [AuthGuard]
       },
       {
         path: 'settings',
         component: StreamerSettingsComponent,
-        canActivate: [AuthGuard, SocketGuard]
+        canActivate: [AuthGuard]
       },
       {
         path: 'files',
         component: StreamerSongsComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'privileges',
+        component: PrivilegesComponent,
         canActivate: [AuthGuard]
       }
     ]
@@ -35,21 +41,26 @@ const routes: Routes = [
   {
     path: 'bot/:userid',
     component: MyBotComponent,
-    canActivate: [AuthGuard, RoleGuard, SocketGuard],
+    canActivate: [AuthGuard, RoleGuard],
     children: [
       {
         path: '',
         component: BotComponent,
-        canActivate: [AuthGuard, SocketGuard]
+        canActivate: [AuthGuard]
       },
       {
         path: 'settings',
         component: StreamerSettingsComponent,
-        canActivate: [AuthGuard, SocketGuard]
+        canActivate: [AuthGuard]
       },
       {
         path: 'files',
         component: StreamerSongsComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'privileges',
+        component: PrivilegesComponent,
         canActivate: [AuthGuard]
       }
     ]

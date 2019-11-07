@@ -1,4 +1,28 @@
-<h2 style="margin-bottom: 5px;" *ngIf="botService.user">{{ botService.user.displayName }}</h2>
+<!-- <h2 style="margin-bottom: 5px;" *ngIf="botService.user">{{ botService.user.displayName }}</h2> -->
+<mat-toolbar class="header-bar" color="primary">
+  <mat-toolbar-row class="secondary" [@slideInUp]="slideInUp">
+    <button mat-button (click)="location.back()" matTooltip="Go Back" matTooltipPosition="below">
+      <i class="fas fa-chevron-circle-left"></i>
+    </button>
+    <div class="username" *ngIf="botService.user">
+      {{ botService.user.displayName | uppercase }}
+    </div>
+    <button mat-button matTooltip="Control Bot" matTooltipPosition="below" *ngIf="hasAccess" (click)="toggleToBot()">
+      <i class="fas fa-robot"></i>
+    </button>
+    <button
+      mat-flat-button
+      color="accent"
+      matTooltip="New Request"
+      matTooltipPosition="below"
+      [disabled]="!botService.canRequest"
+      (click)="newRequest()"
+    >
+      <i class="fas fa-plus-circle"></i>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+<br />
 <div class="inner-content">
   <div>
     <div class="loading-container">
@@ -11,9 +35,28 @@
       <app-request-card [type]="requestCardTypes.PLAYED_REQUESTS" [requests]="botService.playedRequests">
       </app-request-card>
       <app-poll-card [polls]="botService.polls"> </app-poll-card>
-      <button [disabled]="!botService.canRequest" (click)="newRequest()" id="new-request-button" mat-fab color="warn">
+      <!-- <button
+        matTooltip="New Request"
+        matTooltipPosition="right"
+        [disabled]="!botService.canRequest"
+        (click)="newRequest()"
+        id="new-request-button"
+        mat-fab
+        color="warn"
+      >
         <i class="fas fa-plus-circle"></i>
       </button>
+      <button
+        matTooltip="Control Bot"
+        matTooltipPosition="right"
+        *ngIf="hasAccess"
+        (click)="toggleToBot()"
+        id="toggle-to-bot-button"
+        mat-fab
+        color="accent"
+      >
+        <i class="fas fa-robot"></i>
+      </button> -->
       <mat-toolbar class="bottom-bar">
         <button
           mat-flat-button

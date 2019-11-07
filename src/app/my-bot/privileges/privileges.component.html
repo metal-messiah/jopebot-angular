@@ -1,0 +1,29 @@
+<button mat-flat-button [disabled]="botService.fetching.sup" (click)="botService.addStreamerUserPrivilege()">
+  <i
+    [ngClass]="{
+      fas: true,
+      'fa-user': !botService.fetching.sup,
+      'fa-spinner': botService.fetching.sup,
+      'fa-pulse': botService.fetching.sup
+    }"
+  ></i>
+  Add User
+</button>
+<div class="wrapper">
+  <mat-progress-bar mode="indeterminate" *ngIf="botService.fetching.sup"></mat-progress-bar>
+  <form *ngFor="let priv of privs; let i = index" [formGroup]="priv">
+    <h3>{{ botService.privileges[i].user.displayName }}</h3>
+    <div class="controls">
+      <div>
+        <mat-checkbox formControlName="isAdmin">
+          Can Control Your Bot
+        </mat-checkbox>
+      </div>
+      <div>
+        <mat-checkbox formControlName="isBlacklisted">
+          Blacklisted
+        </mat-checkbox>
+      </div>
+    </div>
+  </form>
+</div>

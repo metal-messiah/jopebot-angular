@@ -5,18 +5,6 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 
 import { environment } from '../environments/environment';
 
-import { FontAwesomeModule, FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import {
-  faUser,
-  faSpinner,
-  faCaretSquareDown,
-  faRobot,
-  faUsers,
-  faBook,
-  faCaretDown
-} from '@fortawesome/free-solid-svg-icons';
-import { faTwitch } from '@fortawesome/free-brands-svg-icons';
-
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
@@ -28,7 +16,6 @@ import { MyBotModule } from './my-bot/my-bot.module';
 @NgModule({
   declarations: [AppComponent, HomeComponent],
   imports: [
-    FontAwesomeModule,
     BrowserModule,
     BrowserAnimationsModule,
     CoreModule,
@@ -45,7 +32,5 @@ import { MyBotModule } from './my-bot/my-bot.module';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {
-  constructor(private library: FaIconLibrary) {
-    library.addIcons(faTwitch, faSpinner, faUser, faCaretSquareDown, faRobot, faUsers, faBook, faCaretDown);
-  }
+  constructor() {}
 }

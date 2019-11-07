@@ -1,9 +1,9 @@
 <h2 mat-dialog-title>{{ title }}</h2>
 <div mat-dialog-content>
   <mat-form-field color="accent">
-    <mat-select [formControl]="selectControl" multiple>
+    <mat-select [formControl]="selectControl" [multiple]="multiple">
       <mat-select-trigger>
-        {{ 'Selected ' + selectControl.value.length.toLocaleString() + ' Items' }}
+        {{ getSelectedMessage() }}
       </mat-select-trigger>
       <mat-option *ngFor="let option of options; let i = index" [value]="option" color="accent">
         {{ labels[i] }}

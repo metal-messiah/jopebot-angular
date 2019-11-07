@@ -18,10 +18,7 @@ import eh from '../../interfaces/error-handler';
 export class BotComponent implements OnInit {
   requestCardTypes = RequestCardType;
 
-  userFromId: User;
-  streamerIdParam: string;
-
-  constructor(private botService: BotService, private route: ActivatedRoute, private router: Router) {}
+  constructor(private botService: BotService, private router: Router) {}
 
   ngOnInit() {
     console.log('BOT COMPONENT!');
@@ -30,5 +27,9 @@ export class BotComponent implements OnInit {
   scrollTo(elemId: string) {
     const elem = document.getElementById(elemId);
     elem.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  toggleToUser() {
+    this.router.navigate(['users', this.botService.user.id]);
   }
 }

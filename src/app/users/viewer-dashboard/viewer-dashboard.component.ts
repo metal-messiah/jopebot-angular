@@ -14,7 +14,7 @@ import { HttpClient } from '@angular/common/http';
 import eh from '../../interfaces/error-handler';
 
 import { trigger, transition, useAnimation } from '@angular/animations';
-import { zoomIn } from 'ng-animate';
+import { zoomIn, slideInUp } from 'ng-animate';
 import { StreamerSong } from 'app/models/streamer-song';
 import { MatDialog, MatSnackBar, MatSnackBarConfig } from '@angular/material';
 import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
@@ -29,7 +29,10 @@ import { SnackbarQueueService } from 'app/core/services/snackbar-queue.service';
   selector: 'app-viewer-dashboard',
   templateUrl: './viewer-dashboard.component.html',
   styleUrls: ['./viewer-dashboard.component.css'],
-  animations: [trigger('zoomIn', [transition('* => *', useAnimation(zoomIn))])]
+  animations: [
+    trigger('zoomIn', [transition('* => *', useAnimation(zoomIn))]),
+    trigger('slideInUp', [transition('* => *', useAnimation(slideInUp))])
+  ]
 })
 export class ViewerDashboardComponent implements OnInit {
   requestCardTypes = RequestCardType;
@@ -57,6 +60,8 @@ export class ViewerDashboardComponent implements OnInit {
     duration: 2000
   };
 
+  hasAccess = false;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -78,6 +83,7 @@ export class ViewerDashboardComponent implements OnInit {
       await this.getUserFromId(this.streamerIdParam);
       if (this.userFromId) {
         this.botService.use(this.userFromId);
+        this.hasAccess = await this.botService.hasAccess(this.userFromId.id);
       }
     });
   }
@@ -110,5 +116,9 @@ export class ViewerDashboardComponent implements OnInit {
 
   setMenuTarget(request: Request) {
     this.botService.menuTarget = request;
+  }
+
+  toggleToBot() {
+    this.router.navigate(['bot', this.streamerIdParam]);
   }
 }

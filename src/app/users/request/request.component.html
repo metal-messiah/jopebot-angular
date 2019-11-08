@@ -1,6 +1,17 @@
-<h1 *ngIf="songs">{{ songs.user.displayName }}</h1>
-<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p>
-
+<!-- <h1 *ngIf="songs">{{ songs.user.displayName }}</h1>
+<p *ngIf="errorMsg">{{ authService.currentUser.username }} -- {{ errorMsg }}</p> -->
+<mat-toolbar class="header-bar" color="primary">
+  <mat-toolbar-row class="secondary" [@slideInUp]="slideInUp">
+    <button mat-button (click)="location.back()" matTooltip="Go Back" matTooltipPosition="below">
+      <i class="fas fa-chevron-circle-left"></i>
+    </button>
+    <div class="username" *ngIf="botService.user">
+      {{ botService.user.displayName | uppercase }}
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>
+<br />
+<br />
 <mat-spinner *ngIf="fetching.songs" color="accent"></mat-spinner>
 
 <div class="accordion-wrapper">

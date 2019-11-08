@@ -24,6 +24,7 @@ import { StreamerSettings } from 'app/models/streamer-settings';
 import { BotService } from 'app/core/services/bot.service';
 import { RequestCardType } from '../../enums/request-card-type';
 import { SnackbarQueueService } from 'app/core/services/snackbar-queue.service';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-viewer-dashboard',
@@ -73,7 +74,8 @@ export class ViewerDashboardComponent implements OnInit {
     private socketService: SocketService,
     private streamerSettingsService: StreamerSettingsService,
     private botService: BotService,
-    private snackbar: SnackbarQueueService
+    private snackbar: SnackbarQueueService,
+    private location: Location
   ) {}
 
   async ngOnInit() {

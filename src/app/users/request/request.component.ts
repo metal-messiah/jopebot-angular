@@ -13,11 +13,15 @@ import { AuthService } from 'app/core/services/auth.service';
 import { Request } from 'app/models/request';
 import { RequestService } from 'app/core/services/request.service';
 import { BotService } from 'app/core/services/bot.service';
+import { trigger, transition, useAnimation } from '@angular/animations';
+import { slideInUp } from 'ng-animate';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-request',
   templateUrl: './request.component.html',
-  styleUrls: ['./request.component.css']
+  styleUrls: ['./request.component.css'],
+  animations: [trigger('slideInUp', [transition('* => *', useAnimation(slideInUp))])]
 })
 export class RequestComponent implements OnInit {
   streamerIdParam;
@@ -48,7 +52,8 @@ export class RequestComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private requestService: RequestService,
-    private botService: BotService
+    private botService: BotService,
+    private location: Location
   ) {}
 
   ngOnInit() {

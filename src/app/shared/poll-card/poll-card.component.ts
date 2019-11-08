@@ -15,6 +15,7 @@ import { StreamerPollVote as InputPollVote } from 'app/models/server-input/strea
 import { StreamerPollsService } from 'app/core/services/streamer-polls.service';
 import { MatSnackBar } from '@angular/material';
 import { SnackbarQueueService } from 'app/core/services/snackbar-queue.service';
+import { Tables } from 'app/enums/tables';
 
 class ChartConfig {
   constructor(
@@ -175,13 +176,15 @@ export class PollCardComponent implements OnInit, OnChanges {
         this.snackbar.add(`Voted For ${this.botService.getRequestMessage(pollRequest.request)}`, null, {
           duration: 3000
         });
+
+        this.botService.refreshData(Tables.streamer_polls_votes);
       });
     } else {
       this.voting = true;
       const vote = pollRequest.votes.filter(vote => vote.user.id === this.authService.currentUser.id)[0];
 
       this.streamerPollsVotesService.delete(vote.id).subscribe(v => {
-        console.log(`deleted ${v}`);
+        this.botService.refreshData(Tables.streamer_polls_votes);
       });
     }
   }

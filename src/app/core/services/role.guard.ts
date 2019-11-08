@@ -5,39 +5,45 @@ import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { User } from 'app/models/user';
 import { UserRole } from 'app/enums/user-role';
+import { BotService } from './bot.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private botService: BotService) {}
 
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-    if (this.authService.currentUser) {
-      const isElevated = this.isElevated(this.authService.currentUser);
-      if (!isElevated) {
-        this.router.navigate(['not-authorized']);
-      }
-      return isElevated;
-    } else {
-      const promise: Promise<boolean> = new Promise((resolve, reject) => {
+    const promise: Promise<boolean> = new Promise((resolve, reject) => {
+      if (this.authService.currentUser) {
+        this.isElevated(this.authService.currentUser, next).then(isElevated => {
+          if (!isElevated) {
+            this.router.navigate(['not-authorized']);
+          }
+          resolve(isElevated);
+        });
+      } else {
         this.authService.fetchCurrentUserFromDB().subscribe((user: User) => {
           if (user) {
-            console.log(user);
-            const isElevated = this.isElevated(this.authService.currentUser);
-            resolve(isElevated);
+            this.isElevated(this.authService.currentUser, next).then(isElevated => {
+              if (!isElevated) {
+                this.router.navigate(['not-authorized']);
+              }
+              resolve(isElevated);
+            });
           } else {
             this.router.navigate(['not-authorized']);
             resolve(false);
           }
         });
-      });
-      return promise;
-    }
+      }
+    });
+    return promise;
   }
 
-  isElevated(user: User): boolean {
-    return user.role === UserRole.ADMIN || user.role === UserRole.STAFF;
+  isElevated(user: User, next): Promise<boolean> {
+    const { userid } = next.params;
+    return this.botService.hasAccess(userid); // returns a promise
   }
 }

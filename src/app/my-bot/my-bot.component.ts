@@ -38,6 +38,7 @@ export class MyBotComponent implements OnInit {
           this.botService.use(this.authService.currentUser);
         }
       } else {
+        console.log('not authorized');
         this.router.navigate(['not-authorized']);
       }
     });

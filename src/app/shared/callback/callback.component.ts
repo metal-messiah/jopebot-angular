@@ -26,7 +26,6 @@ export class CallbackComponent implements OnInit {
 
       this.router.navigate([redirect]);
     } else {
-      console.log(this.router, this.route);
       this.router.navigate(['../'], { relativeTo: this.route });
       // window.open('/', '_self');
     }

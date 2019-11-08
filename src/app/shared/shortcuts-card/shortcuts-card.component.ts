@@ -12,6 +12,7 @@ import { Validators } from '@angular/forms';
 import { BotService } from 'app/core/services/bot.service';
 import { Request } from 'app/models/request';
 import { User } from 'app/models/user';
+import { Provider } from 'app/enums/provider';
 
 @Component({
   selector: 'app-shortcuts-card',
@@ -50,7 +51,7 @@ export class ShortcutsCardComponent implements OnInit {
       'This is the best request',
       'Pay attention to me',
       'Have you ever seen something like this?',
-      "I don't think you're capable of this one!"
+      'I don\'t think you\'re capable of this one!'
     ];
     const songs = [
       JSON.stringify({
@@ -109,5 +110,9 @@ export class ShortcutsCardComponent implements OnInit {
 
       this.botService.submitNewRequest(request).subscribe(r => console.log('added ', r));
     }
+  }
+
+  isTwitchUser(): boolean {
+    return this.botService.user && this.botService.user.provider === Provider.twitch;
   }
 }

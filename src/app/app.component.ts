@@ -5,6 +5,9 @@ import { Location } from '@angular/common';
 
 import { trigger, transition, useAnimation } from '@angular/animations';
 import { flipInY, fadeIn, rubberBand, slideInUp } from 'ng-animate';
+import { MatDialog } from '@angular/material';
+import { ConfirmDialogComponent } from './shared/confirm-dialog/confirm-dialog.component';
+import { Provider } from './enums/provider';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -23,7 +26,8 @@ export class AppComponent implements OnInit {
     private _location: Location,
     private auth: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {}
 
   async ngOnInit() {
@@ -48,8 +52,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  login() {
-    this.auth.signIn();
+  login(provider: Provider) {
+    this.auth.signIn(provider);
   }
 
   goBack() {
@@ -58,22 +62,12 @@ export class AppComponent implements OnInit {
 
   getAuthText(): string {
     if (!this.auth.currentUser && this.checkedLogin) {
-      return 'Twitch.tv';
+      return '<i class="fab fa-twitch"></i> <i class="fab fa-microsoft"></i>';
     }
     if (!this.checkedLogin) {
-      return 'Connecting to Twitch.tv...';
+      return 'Connecting...';
     }
     return `${this.auth.currentUser.username}`;
-  }
-
-  getAuthIcon(): string[] {
-    if (!this.auth.currentUser && this.checkedLogin) {
-      return ['fab', 'twitch'];
-    }
-    if (!this.checkedLogin) {
-      return ['fas', 'spinner'];
-    }
-    return ['fas', 'user'];
   }
 
   getAuthIconPulse(): boolean {
@@ -93,7 +87,27 @@ export class AppComponent implements OnInit {
     if (this.auth.currentUser) {
       return this.logout();
     } else {
-      return this.login();
+      return this.chooseProvider();
     }
+  }
+
+  chooseProvider() {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Sign In',
+          options: ['<i class="fab fa-twitch"></i> Twitch', '<i class="fab fa-microsoft"></i> Mixer'],
+          optionsColors: ['#6441a5', '#1fbaed']
+        }
+      })
+      .afterClosed()
+      .subscribe((provider?: string) => {
+        if (provider.toLowerCase().includes(Provider.mixer)) {
+          this.login(Provider.mixer);
+        }
+        if (provider.toLowerCase().includes(Provider.twitch)) {
+          this.login(Provider.twitch);
+        }
+      });
   }
 }

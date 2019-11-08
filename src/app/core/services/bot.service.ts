@@ -399,6 +399,7 @@ export class BotService {
 
   getStreamerSettings() {
     this.message = 'Finding Streamer Settings...';
+    console.log('finding streamer settings', this.user.id);
     setTimeout(() => {
       this.streamerSettingsService
         .getAll({

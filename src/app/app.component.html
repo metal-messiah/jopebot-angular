@@ -21,7 +21,7 @@
             }"
           ></i>
           <!-- <fa-icon [icon]="getAuthIcon()" [pulse]="getAuthIconPulse()"></fa-icon> -->
-          {{ getAuthText() }}
+          <span style="margin-left: 10px;" [innerHTML]="getAuthText()"></span>
         </div>
         <div *ngIf="checkedLogin" class="auth-action">
           {{ getActionText() }}

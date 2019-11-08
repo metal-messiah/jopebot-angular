@@ -10,6 +10,7 @@ import { forkJoin, Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { User } from 'app/models/user';
 import { StorageService } from './storage.service';
+import { Provider } from '../../enums/provider';
 
 @Injectable()
 export class AuthService {
@@ -24,13 +25,13 @@ export class AuthService {
     });
   }
 
-  signIn(target?: string): void {
-    const path = this.getSignInPath(target);
+  signIn(provider: Provider, target?: string): void {
+    const path = this.getSignInPath(provider, target);
     window.location.href = path;
   }
 
-  getSignInPath(target?: string): string {
-    return `${this.rest.getHost()}/api/auth${target ? `?target=${encodeURI(target)}` : ''}`;
+  getSignInPath(provider: Provider, target?: string): string {
+    return `${this.rest.getHost()}/api/auth/${provider}/login${target ? `?target=${encodeURI(target)}` : ''}`;
   }
 
   handleAuthentication(): void {}

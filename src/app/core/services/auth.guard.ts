@@ -4,10 +4,13 @@ import { AuthService } from './auth.service';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { User } from 'app/models/user';
+import { MatDialog } from '@angular/material';
+import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
+import { Provider } from 'app/enums/provider';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private dialog: MatDialog) {}
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -18,7 +21,8 @@ export class AuthGuard implements CanActivate {
         tap(authenticated => {
           console.log(authenticated);
           if (!authenticated) {
-            this.authService.signIn(state.url);
+            // this.authService.signIn(state.url);
+            this.chooseProvider(state.url);
           }
         })
       );
@@ -29,12 +33,33 @@ export class AuthGuard implements CanActivate {
             resolve(true);
           } else {
             console.log('NO USER');
-            this.authService.signIn(state.url);
+            // this.authService.signIn(state.url);
+            this.chooseProvider(state.url);
             resolve(false);
           }
         });
       });
       return promise;
     }
+  }
+
+  chooseProvider(target: string) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Sign In',
+          options: ['<i class="fab fa-twitch"></i> Twitch', '<i class="fab fa-microsoft"></i> Mixer'],
+          optionsColors: ['#6441a5', '#1fbaed']
+        }
+      })
+      .afterClosed()
+      .subscribe((provider?: string) => {
+        if (provider.toLowerCase().includes(Provider.mixer)) {
+          this.authService.signIn(Provider.mixer, target);
+        }
+        if (provider.toLowerCase().includes(Provider.twitch)) {
+          this.authService.signIn(Provider.twitch, target);
+        }
+      });
   }
 }

@@ -1,4 +1,5 @@
 import { UserRole } from 'app/enums/user-role';
+import { Provider } from 'app/enums/provider';
 
 export class User {
   bio?: string;
@@ -9,6 +10,8 @@ export class User {
   username?: string;
 
   role?: UserRole;
+
+  provider?: Provider;
 
   createdAt?: Date;
   updatedAt?: Date;

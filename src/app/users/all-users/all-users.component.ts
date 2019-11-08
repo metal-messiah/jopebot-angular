@@ -1,19 +1,20 @@
-import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { AuthService } from "app/core/services/auth.service";
-import { User } from "../../models/user";
-import { UserService } from "app/core/services/user.service";
-import { SocketService } from "app/core/services/socket.service";
-import * as Fuse from "fuse.js";
-import { FormControl } from "@angular/forms";
-import { debounceTime } from "rxjs/operators";
-import { StreamerSettingsService } from "app/core/services/streamer-settings.service";
-import { StreamerSettings } from "app/models/streamer-settings";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from 'app/core/services/auth.service';
+import { User } from '../../models/user';
+import { UserService } from 'app/core/services/user.service';
+import { SocketService } from 'app/core/services/socket.service';
+import * as Fuse from 'fuse.js';
+import { FormControl } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
+import { StreamerSettingsService } from 'app/core/services/streamer-settings.service';
+import { StreamerSettings } from 'app/models/streamer-settings';
+import { Provider } from 'app/enums/provider';
 
 @Component({
-  selector: "app-all-users",
-  templateUrl: "./all-users.component.html",
-  styleUrls: ["./all-users.component.css"]
+  selector: 'app-all-users',
+  templateUrl: './all-users.component.html',
+  styleUrls: ['./all-users.component.css']
 })
 export class AllUsersComponent implements OnInit {
   onlineUsers: User[] = [];
@@ -29,6 +30,8 @@ export class AllUsersComponent implements OnInit {
 
   textControl: FormControl;
 
+  provider = Provider;
+
   constructor(
     private authService: AuthService,
     private streamerSettingsService: StreamerSettingsService,
@@ -37,7 +40,7 @@ export class AllUsersComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.textControl = new FormControl("");
+    this.textControl = new FormControl('');
     this.textControl.valueChanges.pipe(debounceTime(500)).subscribe(val => {
       this.search(val);
     });
@@ -54,10 +57,10 @@ export class AllUsersComponent implements OnInit {
             const { online, offline } = this.partitionUsers(users);
 
             this.onlineUsers = online;
-            this.sortByStringProperty(this.onlineUsers, "displayName");
+            this.sortByStringProperty(this.onlineUsers, 'displayName');
 
             this.offlineUsers = offline;
-            this.sortByStringProperty(this.offlineUsers, "displayName");
+            this.sortByStringProperty(this.offlineUsers, 'displayName');
 
             this.onlineDisplay = this.onlineUsers;
             this.offlineDisplay = this.offlineUsers;
@@ -90,8 +93,8 @@ export class AllUsersComponent implements OnInit {
 
   sortByStringProperty(array, property) {
     array.sort((a, b) => {
-      if (a[property] > b[property]) return 1;
-      if (a[property] < b[property]) return -1;
+      if (a[property] > b[property]) { return 1; }
+      if (a[property] < b[property]) { return -1; }
       return 0;
     });
   }
@@ -105,7 +108,7 @@ export class AllUsersComponent implements OnInit {
         distance: 100,
         maxPatternLength: 32,
         minMatchCharLength: 2,
-        keys: ["username"]
+        keys: ['username', 'provider']
       };
       this.fuse = new Fuse(this.offlineUsers.concat(this.onlineUsers), options); // "list" is the item array
       const users: User[] = this.fuse.search(term);
@@ -119,6 +122,6 @@ export class AllUsersComponent implements OnInit {
   }
 
   getLogo(user: User) {
-    return `url(${user.logo ? user.logo : "assets/images/no_logo.jpg"})`;
+    return `url(${user.logo ? user.logo : 'assets/images/no_logo.jpg'})`;
   }
 }

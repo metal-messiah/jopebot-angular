@@ -7,11 +7,10 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: "Audiowide", cursive;
+  font-family: 'Audiowide', cursive;
   color: white;
   text-align: center;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-    1px 1px 0 #000;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
   max-width: calc(100% - 20px);
   margin-left: 10px;
   margin-right: 10px;
@@ -37,14 +36,25 @@ mat-form-field {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-image: url("assets/images/background-texture.png");
+  background-image: url('assets/images/background-texture.png');
   background-blend-mode: color-burn;
   box-shadow: black 0px 0px 5px;
   margin: 10px 5px;
   padding: 10px;
   text-align: center;
-  font-family: "Audiowide", cursive;
+  font-family: 'Audiowide', cursive;
   cursor: pointer;
+  position: relative;
+}
+
+.provider {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: orange;
+  background: black;
+  padding: 5px;
+  border-radius: 0 0 0 50%;
 }
 
 .item-card:hover {

@@ -4,7 +4,15 @@
     <button mat-button (click)="location.back()" matTooltip="Go Back" matTooltipPosition="below">
       <i class="fas fa-chevron-circle-left"></i>
     </button>
-    <div class="username" *ngIf="botService.user">
+    <div class="username" *ngIf="botService.user" (click)="goToStream()">
+      <i
+        [ngClass]="{
+          fab: true,
+          'fa-twitch': botService.user.provider === provider.twitch,
+          'fa-microsoft': botService.user.provider === provider.mixer
+        }"
+        style="margin-right: 5px;"
+      ></i>
       {{ botService.user.displayName | uppercase }}
     </div>
     <button mat-button matTooltip="Control Bot" matTooltipPosition="below" *ngIf="hasAccess" (click)="toggleToBot()">

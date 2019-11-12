@@ -10,6 +10,8 @@ import { debounceTime } from 'rxjs/operators';
 import { StreamerSettingsService } from 'app/core/services/streamer-settings.service';
 import { StreamerSettings } from 'app/models/streamer-settings';
 import { Provider } from 'app/enums/provider';
+import { RequestService } from 'app/core/services/request.service';
+import { zip } from 'rxjs';
 
 @Component({
   selector: 'app-all-users',
@@ -19,6 +21,8 @@ import { Provider } from 'app/enums/provider';
 export class AllUsersComponent implements OnInit {
   onlineUsers: User[] = [];
   offlineUsers: User[] = [];
+
+  onlineRequestCounts: number[] = [];
 
   onlineDisplay: User[] = [];
   offlineDisplay: User[] = [];
@@ -36,7 +40,8 @@ export class AllUsersComponent implements OnInit {
     private authService: AuthService,
     private streamerSettingsService: StreamerSettingsService,
     private userService: UserService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private requestService: RequestService
   ) {}
 
   ngOnInit() {
@@ -55,6 +60,11 @@ export class AllUsersComponent implements OnInit {
           (streamerSettings: StreamerSettings[]) => {
             const users = streamerSettings.map(ss => ss.user);
             const { online, offline } = this.partitionUsers(users);
+            const zipper = online.map(u => this.requestService.count({ streamer_id: u.id, 'played is': null }));
+
+            zip(...zipper).subscribe(counts => {
+              this.onlineRequestCounts = counts;
+            });
 
             this.onlineUsers = online;
             this.sortByStringProperty(this.onlineUsers, 'displayName');
@@ -93,8 +103,12 @@ export class AllUsersComponent implements OnInit {
 
   sortByStringProperty(array, property) {
     array.sort((a, b) => {
-      if (a[property] > b[property]) { return 1; }
-      if (a[property] < b[property]) { return -1; }
+      if (a[property] > b[property]) {
+        return 1;
+      }
+      if (a[property] < b[property]) {
+        return -1;
+      }
       return 0;
     });
   }

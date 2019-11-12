@@ -31,6 +31,7 @@ import { StreamerUserPrivilege } from 'app/models/streamer-user-privilege';
 import { TwitchApiService } from './twitch-api.service';
 import { UserRole } from 'app/enums/user-role';
 import { finalize } from 'rxjs/operators';
+import { Sub } from 'app/models/sub';
 
 @Injectable({
   providedIn: 'root'
@@ -71,6 +72,8 @@ export class BotService {
 
   allowed = false;
   checkingAllowed = false;
+
+  subscriptionInfo = null;
 
   constructor(
     private requestService: RequestService,
@@ -410,6 +413,7 @@ export class BotService {
             console.log('got streamer settings');
             this.streamerSettings = streamerSettings[0];
             this.gotSettings$.next();
+            this.checkIfViewerIsSubscriber();
             this.refreshData();
             this.getExistingSongs();
           } else {
@@ -419,11 +423,12 @@ export class BotService {
               user: this.user
             });
             this.streamerSettingsService.create(streamerSettings).subscribe((ss: StreamerSettings) => {
-              console.log('initia;ized with default settings');
+              console.log('initialized with default settings');
               this.message = 'Initialized With Default Settings!';
               setTimeout(() => {
                 this.message = 'Fetching Request Lists';
                 this.gotSettings$.next();
+                this.checkIfViewerIsSubscriber();
                 this.refreshData();
                 this.getExistingSongs();
               }, 1000);
@@ -431,6 +436,13 @@ export class BotService {
           }
         });
     }, 1000);
+  }
+
+  checkIfViewerIsSubscriber() {
+    this.twitchApiService.userIsSub(this.user.id).subscribe((sub: Sub) => {
+      console.log(sub);
+      this.subscriptionInfo = sub;
+    });
   }
 
   getPolls() {

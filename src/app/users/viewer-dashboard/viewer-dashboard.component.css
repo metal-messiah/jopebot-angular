@@ -16,6 +16,11 @@ mat-toolbar-row > .username {
   justify-content: center !important;
   color: white;
   flex-grow: 1;
+  cursor: pointer;
+}
+
+mat-toolbar-row > .username:hover {
+  color: #ffab40;
 }
 
 .mat-toolbar.mat-primary {

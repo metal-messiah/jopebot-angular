@@ -9,6 +9,7 @@ export class StreamerSettings implements Entity {
   requestsPerUser?: number;
   requestQueueLimit?: number;
   isPaused?: boolean;
+  subsOnly?: boolean;
 
   createdAt?: Date;
   createdBy?: User;

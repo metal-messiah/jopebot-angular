@@ -25,6 +25,7 @@ import { BotService } from 'app/core/services/bot.service';
 import { RequestCardType } from '../../enums/request-card-type';
 import { SnackbarQueueService } from 'app/core/services/snackbar-queue.service';
 import { Location } from '@angular/common';
+import { Provider } from 'app/enums/provider';
 
 @Component({
   selector: 'app-viewer-dashboard',
@@ -62,6 +63,8 @@ export class ViewerDashboardComponent implements OnInit {
   };
 
   hasAccess = false;
+
+  provider = Provider;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -122,5 +125,11 @@ export class ViewerDashboardComponent implements OnInit {
 
   toggleToBot() {
     this.router.navigate(['bot', this.streamerIdParam]);
+  }
+
+  goToStream() {
+    const s = this.botService.user;
+    const url = s.provider === Provider.twitch ? `https://twitch.tv/${s.username}` : `https://mixer.com/${s.username}`;
+    window.open(url, '_blank');
   }
 }

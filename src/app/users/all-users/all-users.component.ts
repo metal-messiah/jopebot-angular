@@ -60,11 +60,6 @@ export class AllUsersComponent implements OnInit {
           (streamerSettings: StreamerSettings[]) => {
             const users = streamerSettings.map(ss => ss.user);
             const { online, offline } = this.partitionUsers(users);
-            const zipper = online.map(u => this.requestService.count({ streamer_id: u.id, 'played is': null }));
-
-            zip(...zipper).subscribe(counts => {
-              this.onlineRequestCounts = counts;
-            });
 
             this.onlineUsers = online;
             this.sortByStringProperty(this.onlineUsers, 'displayName');
@@ -76,6 +71,13 @@ export class AllUsersComponent implements OnInit {
             this.offlineDisplay = this.offlineUsers;
 
             this.initializing = false;
+
+            const zipper = this.onlineUsers.map(u =>
+              this.requestService.count({ streamer_id: u.id, 'played is': null })
+            );
+            zip(...zipper).subscribe(counts => {
+              this.onlineRequestCounts = counts;
+            });
           },
           err => {
             console.log(err);

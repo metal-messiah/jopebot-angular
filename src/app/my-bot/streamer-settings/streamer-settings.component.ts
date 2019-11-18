@@ -63,6 +63,10 @@ export class StreamerSettingsComponent implements OnInit {
       isPaused: new FormControl({
         value: this.botService.streamerSettings.isPaused,
         disabled: false
+      }),
+      subsOnly: new FormControl({
+        value: this.botService.streamerSettings.subsOnly,
+        disabled: false
       })
     });
   }

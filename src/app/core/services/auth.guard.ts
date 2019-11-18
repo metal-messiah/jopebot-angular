@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from './auth.service';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { User } from 'app/models/user';
 import { MatDialog } from '@angular/material';
 import { ConfirmDialogComponent } from 'app/shared/confirm-dialog/confirm-dialog.component';
@@ -17,15 +17,25 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
     if (this.authService.currentUser) {
-      return this.authService.isAuthenticated().pipe(
-        tap(authenticated => {
-          console.log(authenticated);
-          if (!authenticated) {
-            // this.authService.signIn(state.url);
+      const promise: Promise<boolean> = new Promise((resolve, reject) => {
+        this.authService.isAuthenticated().subscribe(resp => {
+          console.log(resp);
+          if (!resp.isAuthenticated) {
             this.chooseProvider(state.url);
+            resolve(false);
+          } else {
+            // is authenticated, do they have tokens?
+            if (!resp.hasTokens) {
+              console.log('NO TOKENS!');
+              this.authService.signIn(Provider.twitch, state.url);
+              resolve(false);
+            } else {
+              resolve(true);
+            }
           }
-        })
-      );
+        });
+      });
+      return promise;
     } else {
       const promise: Promise<boolean> = new Promise((resolve, reject) => {
         this.authService.fetchCurrentUserFromDB().subscribe((user: User) => {

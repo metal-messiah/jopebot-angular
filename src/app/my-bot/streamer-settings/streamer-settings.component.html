@@ -15,6 +15,11 @@
         Pause Bot (Disable NEW Requests)
       </mat-checkbox>
     </div>
+    <div>
+      <mat-checkbox formControlName="subsOnly">
+        Subscribers Only
+      </mat-checkbox>
+    </div>
     <br />
     <button mat-fab type="submit" color="primary" [disabled]="!form.valid">
       <i *ngIf="!saving" class="fas fa-save"></i>

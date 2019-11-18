@@ -44,9 +44,9 @@ export class AuthService {
     // window.location.href = this.rest.getHost() + "/api/auth/logout";
   }
 
-  isAuthenticated(): Observable<boolean> {
+  isAuthenticated(): Observable<{ isAuthenticated: boolean; hasTokens: boolean }> {
     const url = this.rest.getHost() + `/api/auth/is-authenticated`;
-    return this.http.get<boolean>(url, { withCredentials: true });
+    return this.http.get<{ isAuthenticated: boolean; hasTokens: boolean }>(url, { withCredentials: true });
   }
 
   fetchCurrentUserFromDB(): Observable<User> {

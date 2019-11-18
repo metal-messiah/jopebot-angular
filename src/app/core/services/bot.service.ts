@@ -349,11 +349,11 @@ export class BotService {
 
   get canRequest(): boolean {
     if (this.streamerSettings) {
-      return (
-        this.streamerSettings.requestsPerUser > this.userRequests &&
+      return this.streamerSettings.requestsPerUser > this.userRequests &&
         this.streamerSettings.requestQueueLimit > this.requestQueue.length &&
-        !this.streamerSettings.isPaused
-      );
+        this.streamerSettings.subsOnly
+        ? this.subscriptionInfo !== null
+        : true && !this.streamerSettings.isPaused;
     }
     return false;
   }
@@ -379,6 +379,10 @@ export class BotService {
           if (this.streamerSettings.isPaused) {
             console.log('paused');
             this.snackbar.add(`${this.user.displayName} has PAUSED new requests`);
+          }
+          if (this.streamerSettings.subsOnly && !this.subscriptionInfo) {
+            console.log('subs only and youre not a sub');
+            this.snackbar.add(`Only subscribers can make requests at this time`);
           }
         }
       });
@@ -440,7 +444,6 @@ export class BotService {
 
   checkIfViewerIsSubscriber() {
     this.twitchApiService.userIsSub(this.user.id).subscribe((sub: Sub) => {
-      console.log(sub);
       this.subscriptionInfo = sub;
     });
   }
